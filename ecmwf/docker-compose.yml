@@ -1,0 +1,15 @@
+# version: '3.8'
+
+services:
+################################################################################
+# ecmwf download
+################################################################################
+  ecmwf:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    image: "ecmwf:latest"
+    container_name: ecmwf
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
