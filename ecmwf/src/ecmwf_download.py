@@ -26,7 +26,8 @@ from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import json
 
-DATA_DIR = os.path.dirname(os.path.realpath(__file__))  # current dir
+# data directory relative to source
+DATA_DIR = "{}/../data".format(os.path.dirname(os.path.realpath(__file__)))
 
 
 def press_key(event: KeyEvent) -> None:
@@ -44,7 +45,7 @@ def write_log(
     :param forecast:
     :return: None
     """
-    log_file = "{}/data/forecast.json".format(DATA_DIR)
+    log_file = "{}/forecast.json".format(DATA_DIR)
     if not os.path.exists(log_file):
         with open(log_file, "w") as create_empty:
             json.dump({}, create_empty)
@@ -63,7 +64,7 @@ def main(
         extended: bool
 ) -> None:
     date_creation = None
-    target: str = "{}/data/{}".format(DATA_DIR, file)
+    target: str = "{}/{}".format(DATA_DIR, file)
     params: list = ["tcwv", "sp", "2t", "2d", "10u", "10v"]
     if extended:
         # HRES 	00 and 12 	0 to 144 by 3, 144 to 240 by 6
@@ -158,9 +159,9 @@ def main(
     # plt.show()
 
     if file == file_default and os.path.exists(
-            "{}/data/{}".format(DATA_DIR, file_default)
+            "{}/{}".format(DATA_DIR, file_default)
     ):
-        os.remove("{}/data/{}".format(DATA_DIR, file_default))
+        os.remove("{}/{}".format(DATA_DIR, file_default))
         print("File '{}' deleted".format(file_default))
 
 
