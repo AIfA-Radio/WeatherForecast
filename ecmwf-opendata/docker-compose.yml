@@ -4,12 +4,12 @@ services:
 ################################################################################
 # ecmwf download
 ################################################################################
-  ecmwf:
+  ecmwf-opendata:
     build:
       dockerfile: ./Dockerfile
       context: .
-    image: "ecmwf:latest"
-    container_name: ecmwf
+    image: "ecmwf-opendata:0.1"
+    container_name: ecmwf-opendata
     volumes:
       - ./data:/app/data
     restart: unless-stopped

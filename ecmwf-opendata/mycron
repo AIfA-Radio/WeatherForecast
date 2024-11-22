@@ -1,0 +1,2 @@
+0 2,14 * * *  python3 /app/src/ecmwf_download.py >>/var/log/out.log 2>/var/log/err.log
+0 8,20 * * *  python3 /app/src/ecmwf_download.py -e >>/var/log/out.log 2>/var/log/err.log

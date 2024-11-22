@@ -18,21 +18,14 @@ https://jswhit.github.io/pygrib/index.html
 from ecmwf.opendata import Client
 import pygrib
 import os
-from datetime import datetime
 import argparse
-import matplotlib.pyplot as plt
-from matplotlib.backend_bases import KeyEvent
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import json
+import math
 
 # data directory relative to source
 DATA_DIR = "{}/../data".format(os.path.dirname(os.path.realpath(__file__)))
-
-
-def press_key(event: KeyEvent) -> None:
-    if event.key == '1':
-        plt.close('all')
 
 
 def write_log(
@@ -49,23 +42,55 @@ def write_log(
     if not os.path.exists(log_file):
         with open(log_file, "w") as create_empty:
             json.dump({}, create_empty)
-            os.chmod(log_file, 0o666)  # owner is root, however any can delete
+            os.chmod(log_file, 0o666)  # docker owner is root, anyone can delete
     with open(log_file, "r+") as jsonFile:
         data = json.load(jsonFile)
         data[datetimestr] = forecast
         jsonFile.seek(0)  # rewind
-        json.dump(data, jsonFile, indent=4, sort_keys=True)
+        json.dump(data,
+                  jsonFile,
+                  indent=2,
+                  sort_keys=True)
         jsonFile.truncate()
 
 
+def create_grid(
+        coordinates: np.array,
+        res: float = 0.25
+) -> dict:
+    """
+    create grid on coordinates
+    :param coordinates:
+    :param res:
+    :return:
+    """
+
+    def flip(x):
+        return (x + 180) % 360 - 180  # [-180, 180[
+#        return x % 360  # [0, 360]
+
+    return {
+        "lat1": max(-90, math.floor(coordinates[0] - 4 * res)),
+        "lat2": min(90, math.ceil(coordinates[0] + 4 * res)),
+        "lon1": flip(math.floor(coordinates[1] - 4 * res)),
+        "lon2": flip(math.ceil(coordinates[1] + 4 * res))
+    }
+
+
 def main(
-        *,
-        file: str,
-        extended: bool
+        extended: bool = False,
+        delete: bool = False
 ) -> None:
+    file_default = "data.grib2"
     date_creation = None
-    target: str = "{}/{}".format(DATA_DIR, file)
-    params: list = ["tcwv", "sp", "2t", "2d", "10u", "10v"]
+    dict_x: dict = {}
+    spatial_resolution: float = 0.25
+
+    config_file = "{}/parameter.json".format(DATA_DIR)
+    config = json.load(open(config_file, "r"))
+    target: str = "{}/{}".format(DATA_DIR, file_default)
+    params: list = config['parameter']
+
     if extended:
         # HRES 	00 and 12 	0 to 144 by 3, 144 to 240 by 6
         steps: list = list(range(0, 144, 3)) + list(range(144, 241, 6))
@@ -74,11 +99,11 @@ def main(
         # HRES 	06 and 18 	0 to 90 by 3
         steps: list = list(range(0, 91, 3))
         print("Fetching 90-hr Forecast")
+
+    coords = np.array([config['geo_coordinates']['latitude'],
+                       config['geo_coordinates']['longitude']])
     # place a rectangle over the region to be used for forecast
-    grid: dict = {"lat1":-23., "lat2":-22., "lon1":-68., "lon2":-67.}
-    # CCAT coordinates. Correct?
-    chajnantor_coords = np.array([-22.72712, -67.33196])
-    dict_x: dict = {}
+    grid = create_grid(coords, spatial_resolution)
 
     if not os.path.exists(target):
         client = Client()
@@ -100,7 +125,8 @@ def main(
             "URL(s) requested: {2}\n"
             .format(results.target, results.datetime, results.urls)
         )
-    os.chmod(target, 0o666)  # owner is root, however any can delete
+        date_creation = results.datetime.strftime("%Y%m%d%H%M")
+    os.chmod(target, 0o666)  # docker owner is root, anyone can delete
 
     fsss = pygrib.open(target)
     fss = fsss.read()
@@ -113,7 +139,7 @@ def main(
             data,
             method='linear'
         )
-        value_at_coordinates = list(nearest_neighbor(chajnantor_coords))[0]
+        value_at_coordinates = list(nearest_neighbor(coords))[0]
         dt_str = "{}{:04d}".format(
                 item['validityDate'],
                 item['validityTime']
@@ -130,10 +156,11 @@ def main(
                 "value": [value_at_coordinates]
             }
 
-        date_creation = "{}{:04d}".format(
-            item["dataDate"],
-            item["dataTime"]
-        )
+        if not date_creation:
+            date_creation = "{}{:04d}".format(
+                item["dataDate"],
+                item["dataTime"]
+            )  # grab from last message if temp file exists
 
     print(
         json.dumps(
@@ -145,45 +172,28 @@ def main(
     write_log(datetimestr=date_creation,
               forecast=dict_x)
 
-    for item, values in dict_x.items():
-        converted_dates = [
-            datetime.strptime(i, '%Y%m%d%H%M') for i in values['time']
-        ]
-        print("Parameter: {}".format(item))
-        fig = plt.figure(item)
-        plt.ylabel(values['unit'])
-        plt.xlabel("Time")
-        plt.plot(converted_dates, values['value'])
-        fig.canvas.mpl_connect('key_press_event', press_key)
-    print("\nClose all figures by pressing key '1'")
-    # plt.show()
-
-    if file == file_default and os.path.exists(
-            "{}/{}".format(DATA_DIR, file_default)
-    ):
+    if not delete and os.path.exists("{}/{}".format(DATA_DIR, file_default)):
         os.remove("{}/{}".format(DATA_DIR, file_default))
         print("File '{}' deleted".format(file_default))
 
 
 if __name__ == "__main__":
-    file_default = "data.grib2"
     parser = argparse.ArgumentParser(
         description="Downloads weather forecasts from ECMWF")
-    parser.add_argument(
-        '-o',
-        '--output',
-        default=file_default,
-        nargs='?',
-        help='Output file (.grib2)'
-             '(default: data.grib2 will be deleted after exit)')
     parser.add_argument(
         '-e',
         '--extended',
         action="store_true",
         help="Fetch 10-day Forecast at 00 or 12 hrs, 90-hr Forecast otherwise"
     )
+    parser.add_argument(
+        '-d',
+        '--delete',
+        action="store_true",
+        help="No deletion of temporary 'data.grib2' file, default=delete)"
+    )
 
     main(
-        file=parser.parse_args().output,
-        extended=parser.parse_args().extended
+        extended=parser.parse_args().extended,
+        delete=parser.parse_args().delete
     )

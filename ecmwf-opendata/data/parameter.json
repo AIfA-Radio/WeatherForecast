@@ -1,0 +1,7 @@
+{
+    "parameter" : ["tcwv", "sp", "2t", "2d", "10u", "10v"],
+    "geo_coordinates": {
+        "latitude": -22.72712,
+        "longitude": -67.33196
+    }
+}
