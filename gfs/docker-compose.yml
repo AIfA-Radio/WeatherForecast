@@ -1,0 +1,15 @@
+# version: '3.8'
+
+services:
+################################################################################
+# gfs download
+################################################################################
+  ecmwf-opendata:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    image: "gfs-pubdata:0.1"
+    container_name: gfs-pubdata
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

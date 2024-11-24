@@ -1,0 +1,11 @@
+{
+    "parameter" : [
+        {"shortName": "pwat"},
+        {"shortName": ["u", "v"], "typeOfLevel": "heightAboveGround", "level": 20},
+        {"shortName": ["t", "pres"], "typeOfLevel": "heightAboveGround", "level": 80}
+    ],
+    "geo_coordinates": {
+        "latitude": -22.72712,
+        "longitude": -67.33196
+    }
+}

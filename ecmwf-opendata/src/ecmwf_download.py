@@ -135,7 +135,7 @@ def main(
         print(item)
         data, lats, lons = item.data(**grid)
         nearest_neighbor = RegularGridInterpolator(
-            (lats[:,0], lons[0,:]),
+            (lats[:, 0], lons[0, :]),
             data,
             method='linear'
         )
@@ -144,7 +144,6 @@ def main(
                 item['validityDate'],
                 item['validityTime']
             )
-
         # create a global dict
         try:
             dict_x[item['name']]['time'].append(dt_str)
