@@ -184,6 +184,8 @@ def ftp_fetch(
                 ) as fp:
                     ftp.retrbinary("RETR {}".format(target), fp.write)
                 print("{} downloaded".format(target))
+                # docker owner is root, anyone can delete in case of failure
+                os.chmod("{}/{}".format(DATA_DIR, target), 0o666)
 
                 r = extract(target=target)
 

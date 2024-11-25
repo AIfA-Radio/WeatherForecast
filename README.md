@@ -63,7 +63,7 @@ The open data is downgraded to a spatial resolution of 0.25 degree and temporal
 resolution of 3 hrs, though.
 
 Forecasts for the following parameter will be downloaded:
-- precipitable water vapor
+- precipitable water vapor column
 - surface pressure
 - temperature 2m above ground
 - dew point 2m above ground
@@ -76,7 +76,41 @@ considered by the "--extended" option to be provided for
 [ecmwf_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/src/ecmwf_download.py)
 (see [mycron](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/mycron))
 
+The current forecast is based on ECMWF’s Integrated Forecasting System, a 
+physical model. Unforetunetely, the Artificial Intelligence/Integrated 
+Forecasting System (AIFS) is in a beta version, that cannot be downloaded with 
+Opendata.
+
 ## ECMWF
-pending - subject to approval of license (applied from 2024/12/01)
+to be developed - subject to approval of license (applied from 2024/12/01)
 
 ## GFS
+The GFS is run four times a day (00, 06, 12, 18 UTC), 
+providing forecasts up to 16 days in advance
+and delivering a spatial resolution 0.25 degree grid (28 km edge length). 
+The model is divided into 127 vertical layers. It produces hourly forecast 
+output for the first 120 hours, then 3 hourly for days 5-16. 
+For the full description see 
+[GFS](https://www.emc.ncep.noaa.gov/emc/pages/numerical_forecast_systems/gfs.php).
+
+The application downloads - via FTP - file by file (total number of 209)
+each forecast. Forecasts comprise the following parameter:
+- Precipitable water - atmosphereSingleLayer:level 0 considered as a single layer
+- U component of wind - heightAboveGround:level 20 m
+- V component of wind - heightAboveGround:level 20 m
+- Temperature - heightAboveGround:level 80 m
+- Pressure - heightAboveGround:level 80 m
+
+Caveat: please note that it requires data of about 115 GB!!! to be downloaded
+each forecast run, hence 460 GB a day. Since data is immediately deleted 
+after being processed, <0.6 GB of storage space needs to be provided at a time.
+
+The quick viewer available under ECMWF may be applied as well to reveal the 
+forecast.
+
+## Epilogue
+
+Problems? Issues? Drop us an email.
+
+contact: Ralf Antonius Timmermann (AIfA, University Bonn), 
+email: rtimmermann@astro.uni-bonn.de
