@@ -17,6 +17,9 @@ timer, as defined in "mycron", will start the forecasts after the dissemination
 schedules. A "parameter.json" file defines the parameters to be
 considered and the geolocation for the forecasts.
 
+Aside: weather are downloaded into local grib2 files. They can be extracted 
+utilizing the [pygrib](https://jswhit.github.io/pygrib/) package. 
+
 Install and run - in background - though 
 
     docker compose build
