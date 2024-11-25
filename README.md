@@ -108,6 +108,11 @@ Caveat: please note that it requires data of about 115 GB!!! to be downloaded
 each forecast run, hence 460 GB a day. Since data is immediately deleted 
 after being processed, <0.6 GB of storage space needs to be provided at a time.
 
+[gfs_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/gfs/src/gfs_download.py)
+can be run with option "-t". In this case only the very first files
+are downloaded (and deleted) for testing the performance. Disable it in mycron
+when running productive!!!
+
 The quick viewer available under ECMWF may be applied as well to reveal the 
 forecast.
 
