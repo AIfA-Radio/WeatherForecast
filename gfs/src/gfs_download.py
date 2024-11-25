@@ -7,7 +7,6 @@ import pygrib
 import os
 import sys
 import re
-from datetime import date
 import argparse
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
@@ -15,8 +14,8 @@ import json
 from ftplib import FTP
 import math
 
-NO_FILES: int = 209
-NO_FILE_TEST: int = 2  # stops download after this
+NO_FILES: int = 209  # total number to download from https://www.nco.ncep.noaa.gov/pmb/products/gfs/
+NO_FILE_TEST: int = 3  # test option "-t" stops after NO_FILE_TEST grib2 files
 
 # data directory relative to source
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -30,7 +29,7 @@ def defined_kwargs(**kwargs) -> dict:
     return {k: v for k, v in kwargs.items() if v is not None}
 
 
-def write_log(
+def write_forecast(
         datetimestr: str,
         forecast: dict
 ) -> None:
@@ -81,9 +80,10 @@ def create_grid(
 def extract(target: str) -> dict:
     fs: list = []
     tmp: dict = {}
-    config_file = "{}/parameter.json".format(DATA_DIR)
-    config = json.load(open(config_file, "r"))
     spatial_resolution: float = 0.25
+    config_file = "{}/parameter.json".format(DATA_DIR)
+    with open(config_file, "r") as f:
+        config = json.load(f)
     coords = np.array([config['geo_coordinates']['latitude'],
                        (config['geo_coordinates']['longitude'] + 360) % 360])
     # place a rectangle over the region to be used for forecast
@@ -116,7 +116,7 @@ def extract(target: str) -> dict:
             item['validityDate'],
             item['validityTime']
         )
-        tmp[ item['name'] ] = {
+        tmp[item['name']] = {
             "unit": item['units'],
             "time": [dt_str],
             "value": [value_at_coordinates]
@@ -134,41 +134,37 @@ def ftp_fetch(
     be absolutely careful
     !!! This routine will download 115 GB of data from GFS' NCEP server of NOAA !!!
     :param datetimestr: YYYYMMDDHH forecast time to be downloaded overwrites
-    :param test: test with few files only
     the current date & times if specified
+    :param test: test with few files only
     :return:
     """
-    l_datetime: list = []
-    last_hour: str = None
     targets: list = []
     msg: str = None
     cnt_files: int = 0
     dict_x: dict = {}
-
     regex = re.compile(r"^gfs.t[0-9]{2}z.pgrb2.0p25.f[0-9]{3}$")
     regex_datetime = re.compile(
         r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
     )
 
-    if datetimestr:
-        l_datetime = re.findall(regex_datetime, datetimestr)
-        if l_datetime:
-            date_string = "".join(l_datetime[0][:3])
-            last_hour = l_datetime[0][3]
-        else:
-            raise ValueError("Invalid Date/Time provided.")
-    else:
-        date_string = "{}{}{}".format(
-            date.today().year,
-            date.today().month,
-            date.today().day
-        )
-
     try:
         ftp = FTP(FTP_HOST)
         ftp.login()
-        ftp.cwd("{}/gfs.{}".format(PATH, date_string))
-        if not l_datetime:
+        if datetimestr:
+            l_datetime = re.findall(regex_datetime, datetimestr)
+            if l_datetime:
+                date_string = "".join(l_datetime[0][:3])
+                last_hour = l_datetime[0][3]
+            else:
+                raise ValueError("Invalid Date/Time provided.")
+            ftp.cwd("{}/gfs.{}".format(PATH, date_string))
+        else:
+            ftp.cwd(PATH)
+            last_entry = sorted(list(filter(
+                lambda x: x.startswith("gfs."), ftp.nlst()
+            )))[-1]
+            ftp.cwd(last_entry)
+            date_string = last_entry.lstrip("gfs.")
             last_hour = ftp.nlst()[-1]
             # reuse datetime for current date/time
             datetimestr = "{}{}".format(date_string, last_hour)
@@ -178,6 +174,7 @@ def ftp_fetch(
                 targets.append(filename)
         print("Number of files to download: {}".format(len(targets)))
         # print(targets)
+        datetimestr += "00"  # append 00 minutes
         if len(targets) == NO_FILES:
             msg = "Success"
             for target in targets:
@@ -201,8 +198,7 @@ def ftp_fetch(
                     os.remove("{}/{}".format(DATA_DIR, target))
                     print("File '{}' deleted".format(target))
                 cnt_files += 1
-                datetimestr += "00"  # append 00 minutes
-                print(
+                if test: print(
                     json.dumps(
                         {datetimestr: dict_x},
                         indent=2,
@@ -210,12 +206,13 @@ def ftp_fetch(
                         default=str
                     )
                 )
-                write_log(datetimestr=datetimestr,
+                write_forecast(datetimestr=datetimestr,
                           forecast=dict_x)  # always update
-                if test and cnt_files > NO_FILE_TEST:  # for testing -d option
+                if test and cnt_files == NO_FILE_TEST:  # for testing -d option
+                    msg = "File set is incomplete due to test option"
                     break
         else:
-            msg = "File set is incomplete"
+            msg = "File set is incomplete. Try again later."
     except Exception as e:
         msg = str(e)
         sys.exit(1)
@@ -236,7 +233,7 @@ if __name__ == "__main__":
         '-t',
         '--test',
         action="store_true",
-        help="Test with 3 files only, default=all"
+        help="Test with first {} files only, default=all".format(NO_FILE_TEST)
     )
 
     ftp_fetch(

@@ -1,1 +1,1 @@
-30 0,6,12,18 * * *  python3 /app/src/gfs_download.py >>/var/log/out.log 2>/var/log/err.log
+30 0,6,12,18 * * *  python3 /app/src/gfs_download.py -t >>/var/log/out.log 2>/var/log/err.log
