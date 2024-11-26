@@ -5,7 +5,7 @@ The NOAA Big Data Program also provides access to gridded 0.25°- and 0.5°-reso
 analysis and forecast data in a trailing 30-day window in the AWS Open Data Registry for GFS.
 Download GFS forecast data
 https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/
-via FTP into a GRIB2 file and extract for each parameter
+via FTP into a GRIB2 file and extract each parameter
 """
 
 import pygrib
@@ -21,6 +21,7 @@ import math
 
 NO_FILES: int = 209  # total number to download from https://www.nco.ncep.noaa.gov/pmb/products/gfs/
 NO_FILE_TEST: int = 3  # test option "-t" stops after NO_FILE_TEST grib2 files
+SPATIAL_RESOLUTION: float = 0.25
 
 # data directory relative to source
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -62,30 +63,32 @@ def write_forecast(
 
 def create_grid(
         coordinates: np.array,
-        res: float = 0.25
+        resolution: float
 ) -> dict:
     """
     create grid on coordinates
     :param coordinates:
-    :param res:
+    :param resolution:
     :return:
     """
 
-    def flip(x):
-        return x % 360  # [0, 360]
+    def flip(x): return x % 360  # [0, 360[
+
+    def floor(x): return math.floor(x / resolution) * resolution
+
+    def ceil(x): return math.ceil(x / resolution) * resolution
 
     return {
-        "lat1": max(-90, math.floor(coordinates[0] - 4 * res)),
-        "lat2": min(90, math.ceil(coordinates[0] + 4 * res)),
-        "lon1": flip(math.floor(coordinates[1] - 4 * res)),
-        "lon2": flip(math.ceil(coordinates[1] + 4 * res))
+        "lat1": max(-90, floor(coordinates[0])),
+        "lat2": min(90, ceil(coordinates[0])),
+        "lon1": flip(floor(coordinates[1])),
+        "lon2": flip(ceil(coordinates[1]))
     }
 
 
 def extract(target: str) -> dict:
     fs: list = []
     tmp: dict = {}
-    spatial_resolution: float = 0.25
     config_file = "{}/parameter.json".format(DATA_DIR)
     with open(config_file, "r") as f:
         config = json.load(f)
@@ -93,8 +96,7 @@ def extract(target: str) -> dict:
                        (config['geo_coordinates']['longitude'] + 360) % 360])
     # place a rectangle over the region to be used for forecast
     grid = create_grid(coordinates=coords,
-                       res=spatial_resolution)
-    # print(grid, coords)
+                       resolution=SPATIAL_RESOLUTION)
 
     fsss = pygrib.open("{}/{}".format(DATA_DIR, target))
     # for item in fsss:

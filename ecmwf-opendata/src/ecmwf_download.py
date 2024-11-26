@@ -24,6 +24,7 @@ import numpy as np
 import json
 import math
 
+SPATIAL_RESOLUTION: float = 0.25
 # data directory relative to source
 DATA_DIR = "{}/../data".format(os.path.dirname(os.path.realpath(__file__)))
 
@@ -56,24 +57,26 @@ def write_log(
 
 def create_grid(
         coordinates: np.array,
-        res: float = 0.25
+        resolution: float
 ) -> dict:
     """
     create grid on coordinates
     :param coordinates:
-    :param res:
+    :param resolution:
     :return:
     """
 
-    def flip(x):
-        return (x + 180) % 360 - 180  # [-180, 180[
-#        return x % 360  # [0, 360]
+    def flip(x): return (x + 180) % 360 - 180  # [-180, 180[
+
+    def floor(x): return math.floor(x / resolution) * resolution
+
+    def ceil(x): return math.ceil(x / resolution) * resolution
 
     return {
-        "lat1": max(-90, math.floor(coordinates[0] - 4 * res)),
-        "lat2": min(90, math.ceil(coordinates[0] + 4 * res)),
-        "lon1": flip(math.floor(coordinates[1] - 4 * res)),
-        "lon2": flip(math.ceil(coordinates[1] + 4 * res))
+        "lat1": max(-90, floor(coordinates[0])),
+        "lat2": min(90, ceil(coordinates[0])),
+        "lon1": flip(floor(coordinates[1])),
+        "lon2": flip(ceil(coordinates[1]))
     }
 
 
@@ -84,7 +87,6 @@ def main(
     file_default = "data.grib2"
     date_creation = None
     dict_x: dict = {}
-    spatial_resolution: float = 0.25
 
     config_file = "{}/parameter.json".format(DATA_DIR)
     config = json.load(open(config_file, "r"))
@@ -102,9 +104,10 @@ def main(
 
     coords = np.array([config['geo_coordinates']['latitude'],
                        config['geo_coordinates']['longitude']])
-    # place a rectangle over the region to be used for forecast
-    grid = create_grid(coords, spatial_resolution)
-
+    # place a grid cell over the region to be used for forecast
+    grid = create_grid(coordinates=coords,
+                       resolution=SPATIAL_RESOLUTION)
+    # print(coords, grid)
     if not os.path.exists(target):
         client = Client()
         results = client.retrieve(
