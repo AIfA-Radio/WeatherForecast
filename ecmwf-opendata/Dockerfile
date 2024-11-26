@@ -1,10 +1,10 @@
-# FROM ubuntu:22.04
-FROM python:3.10.15-slim
+FROM ubuntu:22.04
+# FROM python:3.10.15-slim
 
 RUN apt-get update; \
     apt-get -y upgrade; \
-    apt-get -y install cron
-#    apt-get -y install python3
+    apt-get -y install cron; \
+    apt-get -y install python3
 
 # requirements
 COPY ./requirements.txt /app/requirements.txt
@@ -13,8 +13,8 @@ RUN apt-get -y install --upgrade pip; \
     rm -f /app/requirements.txt
 
 # application and data directory
-COPY src/ecmwf_download.py /app/src/ecmwf_download.py
-COPY data/parameter.json /app/data/parameter.json
+COPY ./src/ecmwf_download.py /app/src/ecmwf_download.py
+COPY ./data/parameter.json /app/data/parameter.json
 
 # Copy and enable your CRON task
 COPY ./mycron /etc/cron.d/mycron
