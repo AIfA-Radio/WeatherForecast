@@ -112,7 +112,7 @@ after being processed, <0.6 GB of storage space needs to be provided at a time.
 [gfs_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/gfs/src/gfs_download.py)
 can be run with option "-t". In this case only the very first files
 are downloaded (and deleted) for testing the performance. Disable it in mycron
-when running productive!!! Option "-s <hour>" runs the script every <hour>th hour.
+when running productive!!! Option "-s \<hour>" runs the script every \<hour>th hour.
 
 The quick viewer available under ECMWF may be applied as well to reveal the 
 forecast.
