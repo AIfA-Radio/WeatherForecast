@@ -8,16 +8,16 @@ Astronomical Park. Data will be accompanied by a radiometer and a weather
 station providing the atmospheric transparency, air temperature, pressure, 
 humidity, and wind, presumably after Q2/25.
 
-Weather forecasts will assist in planning future observations, particularly at 
-higher wavelengths < 350 micrometer and to warn the telescope operator in case of 
-severe weather conditions.
+Weather forecasts will assist in planning near-future observations, particularly
+at higher wavelengths < 350 micrometer, and to enable the telescope operator to
+take action in case of upcoming severe weather conditions.
 
 Applications are available to be executed in docker container. A cron 
 timer, as defined in "mycron", will start the forecasts after the dissemination
 schedules. A "parameter.json" file defines the parameters to be
 considered and the geolocation for the forecasts.
 
-Aside: weather foreasts are downloaded into local grib2 files. They can be 
+Side note: weather foreasts are downloaded into local grib2 files. They can be 
 extracted utilizing the [pygrib](https://jswhit.github.io/pygrib/) package. 
 
 Install and run - in background - though 
@@ -85,7 +85,8 @@ Forecasting System (AIFS) is in a beta version, that cannot be downloaded with
 Opendata.
 
 ## ECMWF
-to be developed - subject to approval of license (applied from 2024/12/01)
+discontinued - license is free of charge for research organisations, but 
+subject to service fee
 
 ## GFS
 The GFS is run four times a day (00, 06, 12, 18 UTC), 
@@ -111,7 +112,7 @@ after being processed, <0.6 GB of storage space needs to be provided at a time.
 [gfs_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/gfs/src/gfs_download.py)
 can be run with option "-t". In this case only the very first files
 are downloaded (and deleted) for testing the performance. Disable it in mycron
-when running productive!!!
+when running productive!!! Option "-s <hour>" runs the script every <hour>th hour.
 
 The quick viewer available under ECMWF may be applied as well to reveal the 
 forecast.

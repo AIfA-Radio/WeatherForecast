@@ -66,7 +66,7 @@ def create_grid(
     :return:
     """
 
-    def flip(x): return (x + 180) % 360 - 180  # [-180, 180[
+    def transpose(x): return (x + 180) % 360 - 180  # [-180, 180[
 
     def floor(x): return math.floor(x / resolution) * resolution
 
@@ -75,8 +75,8 @@ def create_grid(
     return {
         "lat1": max(-90, floor(coordinates[0])),
         "lat2": min(90, ceil(coordinates[0])),
-        "lon1": flip(floor(coordinates[1])),
-        "lon2": flip(ceil(coordinates[1]))
+        "lon1": transpose(floor(coordinates[1])),
+        "lon2": transpose(ceil(coordinates[1]))
     }
 
 

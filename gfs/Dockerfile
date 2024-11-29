@@ -1,6 +1,12 @@
 FROM ubuntu:22.04
 # FROM python:3.10.15-slim
 
+#RUN apt-get update && \
+#    apt-get install -y software-properties-common && \
+#    add-apt-repository -y ppa:deadsnakes/ppa && \
+#    apt-get update && \
+#    apt install -y python3.12
+
 RUN apt-get update; \
     apt-get -y upgrade; \
     apt-get -y install cron; \

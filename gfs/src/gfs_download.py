@@ -21,7 +21,7 @@ import math
 
 NO_FILES: int = 209  # total number to download from https://www.nco.ncep.noaa.gov/pmb/products/gfs/
 NO_FILE_TEST: int = 3  # test option "-t" stops after NO_FILE_TEST grib2 files
-SPATIAL_RESOLUTION: float = 0.25
+SPATIAL_RESOLUTION: float = 0.25  # spatial resolution of the model
 
 # data directory relative to source
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -72,7 +72,7 @@ def create_grid(
     :return:
     """
 
-    def flip(x): return x % 360  # [0, 360[
+    def transpose(x): return x % 360  # [0, 360[
 
     def floor(x): return math.floor(x / resolution) * resolution
 
@@ -81,8 +81,8 @@ def create_grid(
     return {
         "lat1": max(-90, floor(coordinates[0])),
         "lat2": min(90, ceil(coordinates[0])),
-        "lon1": flip(floor(coordinates[1])),
-        "lon2": flip(ceil(coordinates[1]))
+        "lon1": transpose(floor(coordinates[1])),
+        "lon2": transpose(ceil(coordinates[1]))
     }
 
 
@@ -135,7 +135,9 @@ def extract(target: str) -> dict:
 
 def ftp_fetch(
         datetimestr: str = None,
-        test: bool = False
+        *,
+        test: bool = False,
+        subset: int = 1
 ) -> None:
     """
     be absolutely careful
@@ -143,13 +145,16 @@ def ftp_fetch(
     :param datetimestr: YYYYMMDDHH forecast time to be downloaded overwrites
     the current date & times if specified
     :param test: test with few files only
+    :param subset: download every subset^th hour only
     :return:
     """
     targets: list = []
     msg: str = None
     cnt_files: int = 0
     dict_x: dict = {}
-    regex = re.compile(r"^gfs.t[0-9]{2}z.pgrb2.0p25.f[0-9]{3}$")
+    regex = re.compile(
+        r"^gfs.t[0-9]{2}z.pgrb2.0p25.f([0-9]{3})$"
+    )
     regex_datetime = re.compile(
         r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
     )
@@ -185,6 +190,10 @@ def ftp_fetch(
         if len(targets) == NO_FILES:
             msg = "Success"
             for target in targets:
+                hrs = int(re.findall(regex, target)[0])
+                if hrs % subset != 0: # download every ?th hour
+                    print("Skipped hour {} forecast".format(hrs))
+                    continue
                 with open(
                         "{}/{}".format(DATA_DIR, target),
                         'wb'
@@ -216,9 +225,9 @@ def ftp_fetch(
                     )
                 )
                 write_forecast(datetimestr=datetimestr,
-                          forecast=dict_x)  # always update
+                               forecast=dict_x)  # always update
                 if test and cnt_files == NO_FILE_TEST:  # for testing -d option
-                    msg = "File set is incomplete due to test option"
+                    msg = "File set is incomplete due to option"
                     break
         else:
             msg = "File set is incomplete. Try again later."
@@ -244,8 +253,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Test with first {} files only, default=all".format(NO_FILE_TEST)
     )
+    parser.add_argument(
+        '-s',
+        '--subset',
+        type=int,
+        default=1,
+        help="Download every ?(2nd, 3rd, 4th, ...) hour, default=entire set"
+    )
 
     ftp_fetch(
         datetimestr=parser.parse_args().datetimestr,
-        test=parser.parse_args().test
+        test=parser.parse_args().test,
+        subset=parser.parse_args().subset
     )
