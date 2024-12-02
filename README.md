@@ -56,6 +56,7 @@ Results are available under data/forecast.json
 ```
 The forecasts can be viewed through a quick
 [viewer](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/src/ecmwf_forecast_viewer.py)
+also for GFS.
 
 ## ECMWF Opendata
 At no additional cost (research license) an atmospheric model high 
@@ -114,9 +115,6 @@ can be run with option "-t". In this case only the very first files
 are downloaded (and deleted) for testing the performance. Disable it in mycron
 when running productive!!! Option "-s \<hour>" runs the script to reduce the 
 temporal resolution (and bandwidth required) to every \<hour>th hour.
-
-The quick viewer available under ECMWF may be applied as well to reveal the 
-forecast.
 
 ## Epilogue
 
