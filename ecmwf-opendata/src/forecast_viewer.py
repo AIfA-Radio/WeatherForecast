@@ -35,6 +35,7 @@ def read_log() -> dict:
     if not os.path.exists(log_file):
         raise FileNotFoundError
     jsonfile = open(log_file, "r")
+
     return json.load(jsonfile)
 
 
