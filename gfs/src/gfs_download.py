@@ -235,7 +235,7 @@ def ftp_fetch(
         msg = str(e)
         sys.exit(1)
     finally:
-        print("{}: {}".format(datetimestr, msg))
+        print("Datetime {}: {}".format(datetimestr, msg))
 
 
 if __name__ == "__main__":
