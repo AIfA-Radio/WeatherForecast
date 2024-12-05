@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 
 """
-ECMWF 10-day weather forecast for the Cerro Chajnantor coordinates, at Atacama,
-Chile. For public access - with no license - temporal and spatiol resolution is
-downgraded. See specs.
-
-ECMWF HRS
-https://www.ecmwf.int/en/forecasts/datasets/set-i
-
-ecmwf-opendata
-https://github.com/ecmwf/ecmwf-opendata
-
-pygrib docu
-https://jswhit.github.io/pygrib/index.html
+Forecast quick viewer of the ECMWF and GFS forecast parameter values provided in
+forecast.json
 """
 
 import os

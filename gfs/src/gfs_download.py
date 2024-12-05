@@ -192,14 +192,15 @@ def ftp_fetch(
             for target in targets:
                 hrs = int(re.findall(regex, target)[0])
                 if hrs % subset != 0: # download every ?th hour
-                    print("Skipped hour {} forecast".format(hrs))
+                    print("Skipping hour: {} forecast".format(hrs))
                     continue
+                print("File '{}' download started".format(target))
                 with open(
                         "{}/{}".format(DATA_DIR, target),
                         'wb'
                 ) as fp:
                     ftp.retrbinary("RETR {}".format(target), fp.write)
-                print("{} downloaded".format(target))
+                print("File '{}' downloaded".format(target))
                 # docker owner is root, anyone can delete in case of failure
                 os.chmod("{}/{}".format(DATA_DIR, target), 0o666)
 

@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 
 """
-ECMWF 10-day weather forecast for the Cerro Chajnantor coordinates, at Atacama,
-Chile. For public access - with no license - temporal and spatiol resolution is
-downgraded. See specs.
-
-ECMWF HRS
-https://www.ecmwf.int/en/forecasts/datasets/set-i
-
-ecmwf-opendata
-https://github.com/ecmwf/ecmwf-opendata
-
-pygrib docu
-https://jswhit.github.io/pygrib/index.html
+Forecast quick viewer of the ECMWF and GFS forecast parameter values provided in
+forecast.json
 """
 
 import os
@@ -41,17 +31,38 @@ def read_log() -> dict:
 
 def main() -> None:
     dict_x = read_log()
+    dict_fig: dict = {}
+
     for issue_date, forecast in dict_x.items():
         for item, values in forecast.items():
+
+            if not dict_fig.get(item):
+                fig, ax = plt.subplots()
+                dict_fig[item] = {'fig': fig,
+                                  'ax': ax,
+                                  'lines': list()}
+
             print("Issue Date: {}, Parameter: {}".format(issue_date, item))
             converted_dates = [
                 datetime.strptime(i, '%Y%m%d%H%M') for i in values['time']
             ]
-            fig = plt.figure(item)
-            plt.ylabel(values['unit'])
-            plt.xlabel("Time")
-            plt.plot(converted_dates, values['value'])
-            fig.canvas.mpl_connect('key_press_event', press_key)
+            dict_fig[item]['ax'].set_title(item)
+            dict_fig[item]['ax'].set_ylabel(values['unit'])
+            dict_fig[item]['ax'].set_xlabel("Time")
+            dict_fig[item]['lines'].append(
+                dict_fig[item]['ax'].plot(
+                    converted_dates,
+                    values['value'],
+                    label=issue_date[:-2]
+                )[0])
+            dict_fig[item]['fig'].canvas.mpl_connect('key_press_event', press_key)
+            dict_fig[item]['ax'].legend(
+                loc='upper left',
+                bbox_to_anchor=(1, 1),
+                fancybox = True,
+                shadow = True
+            )
+
     print("\nClose all figures by pressing key '1'")
     plt.show()
 

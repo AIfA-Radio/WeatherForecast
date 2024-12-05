@@ -1,7 +1,8 @@
 # Changelog 
-## 0.0.3 (xxxx-xx-xx)
+## 0.0.4 (xxxx-xx-xx)
 ### Added
 ### Changed
+- Quick viewer updated: toggle lines (in-)visible
 ### Fixed
 ### Deprecated
 ### Removed
