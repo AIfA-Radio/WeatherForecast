@@ -101,13 +101,13 @@ def read_log() -> dict:
 
 def main(datetimestr: str) -> None:
     """
-    plot forecasts
+    plots forecasts after datetime string (YYYYMMDDHH), default=current date
     :param datetimestr: format YYYYMMDDHH
     :return:
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    dict_fig: dict = {}
+    dict_fig: dict = dict()
     dict_x = read_log()
 
     now = datetime.strftime(
@@ -119,7 +119,7 @@ def main(datetimestr: str) -> None:
         for item, values in forecast.items():  # loop through parameters
             # disregard if most recent datapoint is before after date
             if values['time'][-1] < after:
-                print("Disregarded Issue Date: {}, Parameter: {}"
+                print("Disregarded Forecast - Issue Date: {}, Parameter: {}"
                       .format(issue_date, item))
                 continue
             print("Issue Date: {}, Parameter: {}".format(issue_date, item))
@@ -136,7 +136,7 @@ def main(datetimestr: str) -> None:
                     "ax": ax,
                     "lines": list(),
                     "values": values["unit"],
-                    "map_legend_to_ax": {}
+                    "map_legend_to_ax": dict()
                 }
 
             dict_fig[item]['lines'].append(
@@ -197,12 +197,12 @@ def main(datetimestr: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Downloads weather forecasts from GFS")
+        description="Plots downloaded weather forecasts from GFS")
     parser.add_argument(
         '-d',
         '--datetimestr',
         type=str,
-        help="Start plot after datetime string (YYYYMMDDHH), "
+        help="Start forecasts after datetime string (YYYYMMDDHH), "
              "default=current datetime"
     )
 
