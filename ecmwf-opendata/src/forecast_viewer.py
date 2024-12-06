@@ -160,7 +160,8 @@ def main(datetimestr: str) -> None:
         for legend_line, ax_line in zip(
                 dict_fig[item]['leg'].get_lines(),
                 dict_fig[item]['lines']):
-            legend_line.set_picker(PICKRADIUS)  # Enable picking on the legend line.
+            # Enable picking on the legend line.
+            legend_line.set_picker(PICKRADIUS)
             dict_fig[item]['map_legend_to_ax'][legend_line] = ax_line
 
         dict_fig[item]['on_pick'] = Onpick(
