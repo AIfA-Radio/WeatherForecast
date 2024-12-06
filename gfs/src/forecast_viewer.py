@@ -34,7 +34,8 @@ class Onpick(object):
             map_legend_to_ax: dict
     ):
         self.fig = fig
-        self.map_legend_to_ax = map_legend_to_ax
+        self.map_legend_to_ax = \
+            map_legend_to_ax if map_legend_to_ax is not None else dict()
 
     def onpick(
             self,
@@ -135,7 +136,7 @@ def main(datetimestr: str) -> None:
                     "fig": fig,
                     "ax": ax,
                     "lines": list(),
-                    "values": values["unit"],
+                    "values": values['unit'],
                     "map_legend_to_ax": dict()
                 }
 
@@ -165,8 +166,8 @@ def main(datetimestr: str) -> None:
             dict_fig[item]['map_legend_to_ax'][legend_line] = ax_line
 
         dict_fig[item]['on_pick'] = Onpick(
-            dict_fig[item]['fig'],
-            dict_fig[item]['map_legend_to_ax']
+            fig=dict_fig[item]['fig'],
+            map_legend_to_ax=dict_fig[item]['map_legend_to_ax']
         )
 
         dict_fig[item]['leg'].set_draggable(True)
