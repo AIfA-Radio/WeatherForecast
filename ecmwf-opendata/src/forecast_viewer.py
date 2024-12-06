@@ -7,20 +7,27 @@ forecast.json
 
 import os
 import signal
-from datetime import datetime
-import matplotlib.pyplot as plt
-from matplotlib.backend_bases import KeyEvent, PickEvent, MouseButton, MouseEvent
-from matplotlib.figure import Figure
 import json
+import argparse
+import matplotlib.pyplot as plt
+from datetime import datetime, timezone
+from matplotlib.backend_bases import (KeyEvent, PickEvent, MouseButton,
+                                      MouseEvent)
+from matplotlib.figure import Figure
+
 
 # data directory relative to source
 DATA_DIR = "{}/../data".format(
     os.path.dirname(
-        os.path.realpath(__file__)))
+        os.path.realpath(__file__)
+    ))
 PICKRADIUS = 5  # Points (Pt). How close the click needs to be to trigger an event.
 
 
 class Onpick(object):
+    """
+    actions to be performed on canvas.mpl_connect events
+    """
     def __init__(
             self,
             fig: Figure,
@@ -33,6 +40,11 @@ class Onpick(object):
             self,
             event: PickEvent
     ) -> None:
+        """
+        toggle individual plots (in-)visible if line is clicked in legend
+        :param event: called through canvas.mpl_connect
+        :return:
+        """
         legend_line = event.artist
         # Do nothing if the source of the event is not a legend line.
         if legend_line not in self.map_legend_to_ax:
@@ -45,9 +57,15 @@ class Onpick(object):
         legend_line.set_alpha(1.0 if visible else 0.2)
         self.fig.canvas.draw()
 
-    def invert(self,
-               event: MouseEvent
-               ) -> None:
+    def invert(
+            self,
+            event: MouseEvent
+    ) -> None:
+        """
+        toggle all plots (in-)visible on right mouse button
+        :param event: called through canvas.mpl_connect
+        :return:
+        """
         if event.button is MouseButton.RIGHT:
             for legend_line, ax_line in self.map_legend_to_ax.items():
                 visible = not ax_line.get_visible()
@@ -59,11 +77,20 @@ class Onpick(object):
 
 
 def press_key(event: KeyEvent) -> None:
+    """
+    exit all plot on key 1
+    :param event: called through canvas.mpl_connect
+    :return:
+    """
     if event.key == '1':
         plt.close('all')
 
 
 def read_log() -> dict:
+    """
+    read forecast JSON file
+    :return:
+    """
     log_file = "{}/forecast.json".format(DATA_DIR)
     if not os.path.exists(log_file):
         raise FileNotFoundError
@@ -72,20 +99,36 @@ def read_log() -> dict:
     return json.load(jsonfile)
 
 
-def main() -> None:
+def main(datetimestr: str) -> None:
+    """
+    plot forecasts
+    :param datetimestr: format YYYYMMDDHH
+    :return:
+    """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    dict_x = read_log()
     dict_fig: dict = {}
+    dict_x = read_log()
 
-    for issue_date, forecast in dict_x.items():
-        for item, values in forecast.items():
+    now = datetime.strftime(
+        datetime.now(timezone.utc), '%Y%m%d%H%M'
+    )
+    after = datetimestr if datetimestr else now
 
+    for issue_date, forecast in dict_x.items():  # loop through forecast dates
+        for item, values in forecast.items():  # loop through parameters
+            # disregard if most recent datapoint is before after date
+            if values['time'][-1] < after:
+                print("Disregarded Issue Date: {}, Parameter: {}"
+                      .format(issue_date, item))
+                continue
             print("Issue Date: {}, Parameter: {}".format(issue_date, item))
+
             converted_dates = [
                 datetime.strptime(i, '%Y%m%d%H%M') for i in values['time']
             ]
 
+            # define parameters at first time
             if not dict_fig.get(item):
                 fig, ax = plt.subplots()
                 dict_fig[item] = {
@@ -97,6 +140,7 @@ def main() -> None:
                 }
 
             dict_fig[item]['lines'].append(
+                # plot each line and append line to lines
                 dict_fig[item]['ax'].plot(
                     converted_dates,
                     values['value'],
@@ -125,25 +169,40 @@ def main() -> None:
         )
 
         dict_fig[item]['leg'].set_draggable(True)
+        # close on key 1
         dict_fig[item]['fig'].canvas.mpl_connect(
             'key_press_event',
             press_key
         )
+        # toggle visibility of individual line
         dict_fig[item]['fig'].canvas.mpl_connect(
             'pick_event',
-            dict_fig[item]['on_pick'].onpick  # call method of Onpick
+            dict_fig[item]['on_pick'].onpick
         )
+        # toggle visibilities of all lines
         dict_fig[item]['fig'].canvas.mpl_connect(
             'button_press_event',
-            dict_fig[item]['on_pick'].invert  # call method of Onpick
+            dict_fig[item]['on_pick'].invert
         )
 
-    print("\nClose all figures by pressing key '1'."
-          "\nClick right mouse button to toggle visibilities of all lines."
-          "\nClick on individual line in legend to toggle its visibility.")
+    print(
+        "\nClose all figures by pressing key '1'."
+        "\nClick right mouse button to toggle visibilities of all lines."
+        "\nClick on individual line in legend to toggle its visibility."
+    )
 
     plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Downloads weather forecasts from GFS")
+    parser.add_argument(
+        '-d',
+        '--datetimestr',
+        type=str,
+        help="Start plot after datetime string (YYYYMMDDHH), "
+             "default=current datetime"
+    )
+
+    main(datetimestr=parser.parse_args().datetimestr)
