@@ -3,6 +3,7 @@
 ### Added
 ### Changed
 - Quick viewer updated: toggle lines (in-)visible
+- Quick viewer moved to tools directory, one for all 
 ### Fixed
 ### Deprecated
 ### Removed

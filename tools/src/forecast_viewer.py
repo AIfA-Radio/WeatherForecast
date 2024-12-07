@@ -6,6 +6,7 @@ forecast.json
 """
 
 import os
+import sys
 import signal
 import json
 import argparse
@@ -17,7 +18,7 @@ from matplotlib.figure import Figure
 
 
 # data directory relative to source
-DATA_DIR = "{}/../data".format(
+DATA_DIR = "{}/../../".format(
     os.path.dirname(
         os.path.realpath(__file__)
     ))
@@ -87,12 +88,12 @@ def press_key(event: KeyEvent) -> None:
         plt.close('all')
 
 
-def read_log() -> dict:
+def read_log(log_file: str) -> dict:
     """
     read forecast JSON file
+    :param log_file: location of forecast.json
     :return:
     """
-    log_file = "{}/forecast.json".format(DATA_DIR)
     if not os.path.exists(log_file):
         raise FileNotFoundError
     jsonfile = open(log_file, "r")
@@ -100,16 +101,28 @@ def read_log() -> dict:
     return json.load(jsonfile)
 
 
-def main(datetimestr: str) -> None:
+def main(
+        provider: str,
+        datetimestr: str
+) -> None:
     """
     plots forecasts after datetime string (YYYYMMDDHH), default=current date
+    :param provider: weather forecast provider ecmwf | gfs
     :param datetimestr: format YYYYMMDDHH
     :return:
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     dict_fig: dict = dict()
-    dict_x = read_log()
+
+    if provider == "ecmwf":
+        log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
+    elif provider == "gfs":
+        log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
+    else:
+        print("Wrong provider!")
+        sys.exit(1)
+    dict_x = read_log(log_file=log_file)
 
     now = datetime.strftime(
         datetime.now(timezone.utc), '%Y%m%d%H%M'
@@ -194,11 +207,12 @@ def main(datetimestr: str) -> None:
     )
 
     plt.show()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Plots downloaded weather forecasts from ECMWF")
+        description="Plots downloaded weather forecasts from ECMWF or GFS.")
     parser.add_argument(
         '-d',
         '--datetimestr',
@@ -206,5 +220,16 @@ if __name__ == "__main__":
         help="Start forecasts after datetime string (YYYYMMDDHH), "
              "default=current datetime"
     )
+    parser.add_argument(
+        '-p',
+        '--provider',
+        type=str,
+        required=True,
+        choices=["ecmwf", "gfs"],
+        help="Select provider 'ecmwf' | 'gfs', defualt=ecmwf"
+    )
 
-    main(datetimestr=parser.parse_args().datetimestr)
+    main(
+        provider=parser.parse_args().provider,
+        datetimestr=parser.parse_args().datetimestr
+    )
