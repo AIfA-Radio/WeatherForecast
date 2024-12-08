@@ -54,6 +54,9 @@ Results are available under data/forecast.json
   }
 }
 ```
+The forecasts can be viewed through a quick
+[viewer](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_viewer.py)
+for ECMWF and GFS. Select via option "-p"
 
 ## ECMWF Opendata
 At no additional cost (research license) an atmospheric model high 
@@ -114,10 +117,6 @@ when running productive!!! Option "-s \<hour>" runs the script to reduce the
 temporal resolution (and bandwidth required) to every \<hour>th hour.
 
 ## Epilogue
-
-The forecasts can be viewed through a quick
-[viewer](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_viewer.py)
-for ECMWF and GFS. Select via option "-p"
 
 Problems? Issues? Drop us an email.
 
