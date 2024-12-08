@@ -16,7 +16,6 @@ from matplotlib.backend_bases import (KeyEvent, PickEvent, MouseButton,
                                       MouseEvent)
 from matplotlib.figure import Figure
 
-
 # data directory relative to source
 DATA_DIR = "{}/../../".format(
     os.path.dirname(
@@ -29,6 +28,7 @@ class Onpick(object):
     """
     actions to be performed on canvas.mpl_connect events
     """
+
     def __init__(
             self,
             fig: Figure,
@@ -96,9 +96,10 @@ def read_log(log_file: str) -> dict:
     """
     if not os.path.exists(log_file):
         raise FileNotFoundError
-    jsonfile = open(log_file, "r")
+    with open(log_file, "r") as jsonfile:
+        res = json.load(jsonfile)
 
-    return json.load(jsonfile)
+    return res
 
 
 def main(
@@ -124,10 +125,9 @@ def main(
         sys.exit(1)
     dict_x = read_log(log_file=log_file)
 
-    now = datetime.strftime(
+    after = datetimestr if datetimestr else datetime.strftime(
         datetime.now(timezone.utc), '%Y%m%d%H%M'
     )
-    after = datetimestr if datetimestr else now
 
     for issue_date, forecast in dict_x.items():  # loop through forecast dates
         for item, values in forecast.items():  # loop through parameters
