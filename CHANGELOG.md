@@ -1,5 +1,5 @@
 # Changelog 
-## 0.0.4 (xxxx-xx-xx)
+## 0.0.4 (2024-12-08)
 ### Added
 ### Changed
 - Quick viewer updated: toggle lines (in-)visible
