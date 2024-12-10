@@ -88,7 +88,7 @@ def main(
     except KeyError:
         raise KeyError("Wind forecast data not found!")
     except IndexError:
-        raise KeyError("Forecast date/time not fround!")
+        raise IndexError("Forecast date/time not found in forecast.json!")
 
     v_abs = (np.sqrt(np.power(u, 2) + np.power(v, 2)))
     v_abs_max = max(v_abs)  # ToDo max be used
@@ -102,7 +102,7 @@ def main(
     fig.suptitle("Windspeed [m/s] and Direction [°] at Cerro Chajnantor")
 
     def animate(i):
-        if i == number_entries-1:
+        if i == number_entries - 1:
             ax.clear()
         fig.canvas.manager.set_window_title(
             datetime.strptime(time[i], '%Y%m%d%H%M')
@@ -112,7 +112,7 @@ def main(
         ax.bar(
             x=v_dir[i],
             height=v_abs[i],
-            width=np.pi/16,
+            width=np.pi / 16,
             bottom=0.0,
             color=colormaps[COLOR_MAP](v_abs[i] / V_MAX),
             alpha=0.5
