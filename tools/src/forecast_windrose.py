@@ -8,6 +8,7 @@ forecast.json
 import os
 import sys
 import signal
+import re
 import json
 import argparse
 import matplotlib.pyplot as plt
@@ -52,39 +53,50 @@ def main(
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    regex_datetime = re.compile(
+        r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
+    )
+    if datetimestr:
+        if not re.match(regex_datetime, datetimestr):
+            raise ValueError("Invalid Date/Time provided.")
+
     if provider == "ecmwf":
         log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
     elif provider == "gfs":
         log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
     else:
-        print("Wrong provider!")
-        sys.exit(1)
+        raise NotImplementedError("Wrong provider!")
 
     dict_x = read_log(log_file=log_file)
 
     try:
         if provider == "ecmwf":
-            last_issue_date = datetimestr if datetimestr else sorted(
-                {k: v for k, v in dict_x.items() if k[-4:-2] in ['00', '12']}.items()
+            last_issue_date = sorted(
+                {k: v for k, v in dict_x.items() if k==datetimestr+"00"}.items()
+            )[0] \
+                if datetimestr else sorted(
+                {k: v for k, v in dict_x.items()}.items()
             )[-1]
             print("Issue Date: {}".format(last_issue_date[0]))
             u = last_issue_date[1]['10 metre U wind component']['value']
             v = last_issue_date[1]['10 metre V wind component']['value']
             time = last_issue_date[1]['10 metre U wind component']['time']
         else:
-            last_issue_date = datetimestr if datetimestr else sorted(
+            last_issue_date = sorted(
+                {k: v for k, v in dict_x.items() if k==datetimestr+"00"}.items()
+            )[0] \
+                if datetimestr else sorted(
                 {k: v for k, v in dict_x.items()}.items()
             )[-1]
-            print(last_issue_date[1])
+            print("Issue Date: {}".format(last_issue_date[0]))
             u = last_issue_date[1]['U component of wind']['value']
             v = last_issue_date[1]['V component of wind']['value']
             time = last_issue_date[1]['U component of wind']['time']
     except KeyError:
-        print("Wind forecast data not found!")
-        sys.exit(1)
+        raise KeyError("Wind forecast data not found!")
 
     v_abs = (np.sqrt(np.power(u, 2) + np.power(v, 2)))
-    v_abs_max = max(v_abs)
+    v_abs_max = max(v_abs)  # ToDo max be used
     number_entries = len(v_abs)
     v_dir = (np.pi + np.atan2(u, v)) % (2 * np.pi)
 

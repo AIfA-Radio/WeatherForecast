@@ -7,6 +7,7 @@ forecast.json
 
 import os
 import sys
+import re
 import signal
 import json
 import argparse
@@ -114,6 +115,12 @@ def main(
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    regex_datetime = re.compile(
+        r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
+    )
+    if not re.match(regex_datetime, datetimestr):
+        raise ValueError("Invalid Date/Time provided.")
+
     dict_fig: dict = dict()
 
     if provider == "ecmwf":
@@ -121,8 +128,8 @@ def main(
     elif provider == "gfs":
         log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
     else:
-        print("Wrong provider!")
-        sys.exit(1)
+        raise NotImplementedError("Wrong provider!")
+
     dict_x = read_log(log_file=log_file)
 
     after = datetimestr if datetimestr else datetime.strftime(
