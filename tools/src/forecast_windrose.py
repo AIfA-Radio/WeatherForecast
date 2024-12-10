@@ -70,30 +70,25 @@ def main(
     dict_x = read_log(log_file=log_file)
 
     try:
+        last_issue_date = sorted(
+            {k: v for k, v in dict_x.items() if k == datetimestr + "00"}.items()
+        )[0] \
+            if datetimestr else sorted(
+            {k: v for k, v in dict_x.items()}.items()
+        )[-1]
+        print("Issue Date: {}".format(last_issue_date[0]))
         if provider == "ecmwf":
-            last_issue_date = sorted(
-                {k: v for k, v in dict_x.items() if k==datetimestr+"00"}.items()
-            )[0] \
-                if datetimestr else sorted(
-                {k: v for k, v in dict_x.items()}.items()
-            )[-1]
-            print("Issue Date: {}".format(last_issue_date[0]))
             u = last_issue_date[1]['10 metre U wind component']['value']
             v = last_issue_date[1]['10 metre V wind component']['value']
             time = last_issue_date[1]['10 metre U wind component']['time']
         else:
-            last_issue_date = sorted(
-                {k: v for k, v in dict_x.items() if k==datetimestr+"00"}.items()
-            )[0] \
-                if datetimestr else sorted(
-                {k: v for k, v in dict_x.items()}.items()
-            )[-1]
-            print("Issue Date: {}".format(last_issue_date[0]))
             u = last_issue_date[1]['U component of wind']['value']
             v = last_issue_date[1]['V component of wind']['value']
             time = last_issue_date[1]['U component of wind']['time']
     except KeyError:
         raise KeyError("Wind forecast data not found!")
+    except IndexError:
+        raise KeyError("Forecast date/time not fround!")
 
     v_abs = (np.sqrt(np.power(u, 2) + np.power(v, 2)))
     v_abs_max = max(v_abs)  # ToDo max be used
