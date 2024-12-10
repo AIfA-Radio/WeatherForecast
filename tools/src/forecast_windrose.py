@@ -89,8 +89,9 @@ def main(
     v_dir = (np.pi + np.atan2(u, v)) % (2 * np.pi)
 
     fig = plt.figure(figsize=(8, 8))
+    # initialize settings
     ax = plt.subplot(projection='polar')
-    ax.set_rlim(0, math.ceil(v_abs_max + 0.5))
+    ax.set_rlim(0, math.ceil(V_MAX + 0.5))
     fig.suptitle("Windspeed [m/s] and Direction [°] at Cerro Chajnantor")
 
     def animate(i):
@@ -99,7 +100,7 @@ def main(
         fig.canvas.manager.set_window_title(
             datetime.strptime(time[i], '%Y%m%d%H%M')
         )
-        ax.set_rlim(0, math.ceil(v_abs_max + 0.5))
+        ax.set_rlim(0, math.ceil(V_MAX + 0.5))
         fig.suptitle("Windspeed [m/s] and Direction [°] at Cerro Chajnantor")
         ax.bar(
             x=v_dir[i],
