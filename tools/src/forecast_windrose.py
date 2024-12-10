@@ -62,8 +62,12 @@ def main(
 
     if provider == "ecmwf":
         log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
+        u_key = "10 metre U wind component"
+        v_key = "10 metre V wind component"
     elif provider == "gfs":
         log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
+        u_key = "U component of wind"
+        v_key = "V component of wind"
     else:
         raise NotImplementedError("Wrong provider!")
 
@@ -77,14 +81,9 @@ def main(
             {k: v for k, v in dict_x.items()}.items()
         )[-1]
         print("Issue Date: {}".format(last_issue_date[0]))
-        if provider == "ecmwf":
-            u = last_issue_date[1]['10 metre U wind component']['value']
-            v = last_issue_date[1]['10 metre V wind component']['value']
-            time = last_issue_date[1]['10 metre U wind component']['time']
-        else:
-            u = last_issue_date[1]['U component of wind']['value']
-            v = last_issue_date[1]['V component of wind']['value']
-            time = last_issue_date[1]['U component of wind']['time']
+        u = last_issue_date[1][u_key]['value']
+        v = last_issue_date[1][v_key]['value']
+        time = last_issue_date[1][u_key]['time']
     except KeyError:
         raise KeyError("Wind forecast data not found!")
     except IndexError:
