@@ -1,6 +1,7 @@
 # Changelog 
 ## 0.0.4 (2024-12-08)
 ### Added
+- Quick viewer of the the last forecast for windspeed and direction (windrose)
 ### Changed
 - Quick viewer updated: toggle lines (in-)visible
 - Quick viewer moved to tools directory, one for all 
