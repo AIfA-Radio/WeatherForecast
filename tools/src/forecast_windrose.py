@@ -25,7 +25,7 @@ DATA_DIR = "{}/../../".format(
     ))
 COLOR_MAP = 'jet'
 V_MAX = 20.  # max abs. windspeed on windrose
-
+TITLE = "Windspeed [m/s] And Direction (from) [°] On Cerro Chajnantor"
 
 def read_log(log_file: str) -> dict:
     """
@@ -43,7 +43,7 @@ def read_log(log_file: str) -> dict:
 
 def main(
         provider: str,
-        datetimestr: str
+        datetimestr: str = None
 ) -> None:
     """
     plots forecasts after datetime string (YYYYMMDDHH), default=current date
@@ -98,7 +98,7 @@ def main(
     # initialize settings
     ax = plt.subplot(projection='polar')
     ax.set_rlim(0, math.ceil(V_MAX + 0.5))
-    fig.suptitle("Windspeed [m/s] and Direction [°] at Cerro Chajnantor")
+    fig.suptitle(TITLE)
 
     def animate(i):
         if i == number_entries - 1:
@@ -107,7 +107,7 @@ def main(
             datetime.strptime(time[i], '%Y%m%d%H%M')
         )
         ax.set_rlim(0, math.ceil(V_MAX + 0.5))
-        fig.suptitle("Windspeed [m/s] and Direction [°] at Cerro Chajnantor")
+        fig.suptitle(TITLE)
         ax.bar(
             x=v_dir[i],
             height=v_abs[i],
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         '--datetimestr',
         type=str,
         help="Start forecasts after datetime string (YYYYMMDDHH), "
-             "default=current datetime"
+             "default=current"
     )
     parser.add_argument(
         '-p',
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
         choices=["ecmwf", "gfs"],
-        help="Select provider 'ecmwf' | 'gfs', defualt=ecmwf"
+        help="Select forecast provider (mandatory)"
     )
 
     main(
