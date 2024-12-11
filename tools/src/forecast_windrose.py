@@ -25,7 +25,7 @@ DATA_DIR = "{}/../../".format(
     ))
 COLOR_MAP = 'jet'
 V_MAX = 20.  # max abs. windspeed on windrose
-TITLE = "Windspeed [m/s] And Direction (from) [°] On Cerro Chajnantor"
+TITLE = "{} Windspeed [m/s] and (from) Direction [°] On Cerro Chajnantor"
 
 def read_log(log_file: str) -> dict:
     """
@@ -43,12 +43,14 @@ def read_log(log_file: str) -> dict:
 
 def main(
         provider: str,
-        datetimestr: str = None
+        datetimestr: str = None,
+        video: bool = False
 ) -> None:
     """
     plots forecasts after datetime string (YYYYMMDDHH), default=current date
-    :param provider: weather forecast provider ecmwf | gfs
+    :param provider: weather forecast provider ECMWF | GFS
     :param datetimestr: format YYYYMMDDHH
+    :param video: if video is downloaded to mp4 
     :return:
     """
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -60,11 +62,11 @@ def main(
         if not re.match(regex_datetime, datetimestr):
             raise ValueError("Invalid Date/Time provided.")
 
-    if provider == "ecmwf":
+    if provider == "ECMWF":
         log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
         u_key = "10 metre U wind component"
         v_key = "10 metre V wind component"
-    elif provider == "gfs":
+    elif provider == "GFS":
         log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
         u_key = "U component of wind"
         v_key = "V component of wind"
@@ -98,16 +100,14 @@ def main(
     # initialize settings
     ax = plt.subplot(projection='polar')
     ax.set_rlim(0, math.ceil(V_MAX + 0.5))
-    fig.suptitle(TITLE)
+    fig.suptitle(TITLE.format(provider))
 
     def animate(i):
-        if i == number_entries - 1:
+        if not video and i == number_entries - 1:
             ax.clear()
-        fig.canvas.manager.set_window_title(
-            datetime.strptime(time[i], '%Y%m%d%H%M')
-        )
+        fig.suptitle(TITLE.format(provider))
+        ax.set_title(datetime.strptime(time[i], '%Y%m%d%H%M'))
         ax.set_rlim(0, math.ceil(V_MAX + 0.5))
-        fig.suptitle(TITLE)
         ax.bar(
             x=v_dir[i],
             height=v_abs[i],
@@ -120,11 +120,16 @@ def main(
     anim = animation.FuncAnimation(
         fig,
         animate,
-        repeat=True,
+        repeat=(not video),
         blit=False,
-        frames=number_entries,
-        interval=1000
+        frames=range(number_entries),
+        interval=250  # msec
     )
+    if video:
+        ffwriter = animation.FFMpegWriter()
+        anim.save(
+            '{}/tools/plots/forecast_windrose.mp4'.format(DATA_DIR),
+            writer=ffwriter)
 
     plt.show()
     sys.exit(0)
@@ -145,11 +150,18 @@ if __name__ == "__main__":
         '--provider',
         type=str,
         required=True,
-        choices=["ecmwf", "gfs"],
+        choices=["ECMWF", "GFS"],
         help="Select forecast provider (mandatory)"
+    )
+    parser.add_argument(
+        '-v',
+        '--video',
+        help="Store video on tools/plots/plot.mp4, default=No",
+        action='store_true'
     )
 
     main(
         provider=parser.parse_args().provider,
-        datetimestr=parser.parse_args().datetimestr
+        datetimestr=parser.parse_args().datetimestr,
+        video=parser.parse_args().video,
     )

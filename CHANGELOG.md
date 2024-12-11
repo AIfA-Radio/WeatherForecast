@@ -1,4 +1,12 @@
 # Changelog 
+## 0.0.5 (xxxx-xx-xx)
+### Added
+- Quick viewer updated with save video option to mp4 file
+### Changed
+### Fixed
+### Deprecated
+### Removed
+### Security
 ## 0.0.4 (2024-12-08)
 ### Added
 - Quick viewer of the the last forecast for windspeed and direction (windrose)

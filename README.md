@@ -59,7 +59,7 @@ The forecasts can be viewed through a quick
 for ECMWF and GFS. Select via option "-p". Also the windspeed and direction is
 display in a windrose, by calling [forecast_windrose](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_windrose.py).
 Always the last forecast is considered, unless a different forecast is chosen 
-by option "-d"
+by option "-d". Option "-v" provides a save to mp4 file option.
 
 ## ECMWF Opendata
 At no additional cost (research license) an atmospheric model high 
