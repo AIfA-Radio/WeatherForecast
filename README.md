@@ -56,10 +56,12 @@ Results are available under data/forecast.json
 ```
 The forecasts can be viewed through a quick
 [forecast_viewer](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_viewer.py)
-for ECMWF and GFS. Select via option "-p". Also the windspeed and direction is
-display in a windrose, by calling [forecast_windrose](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_windrose.py).
+for ECMWF and GFS. Select via option "-p". Also, the windspeed and direction is
+displayed in a windrose, by calling [forecast_windrose](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_windrose.py).
 Always the last forecast is considered, unless a different forecast is chosen 
-by option "-d". Option "-v" provides a save to mp4 file option.
+by option "-d". Option "-v" provides a save to mp4 file option. However, for 
+utilizing the download mp4 function, the FFmpeg package is to be installed on 
+the OS.
 
 ## ECMWF Opendata
 At no additional cost (research license) an atmospheric model high 
