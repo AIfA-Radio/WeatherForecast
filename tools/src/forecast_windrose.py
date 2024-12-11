@@ -27,6 +27,7 @@ COLOR_MAP = 'jet'
 V_MAX = 20.  # max abs. windspeed on windrose
 TITLE = "{} Windspeed [m/s] and (from) Direction [°] On Cerro Chajnantor"
 
+
 def read_log(log_file: str) -> dict:
     """
     read forecast JSON file
@@ -53,8 +54,6 @@ def main(
     :param video: if video is downloaded to mp4 
     :return:
     """
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
     regex_datetime = re.compile(
         r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
     )

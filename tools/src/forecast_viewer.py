@@ -109,7 +109,7 @@ def main(
 ) -> None:
     """
     plots forecasts after datetime string (YYYYMMDDHH), default=current date
-    :param provider: weather forecast provider ecmwf | gfs
+    :param provider: weather forecast provider ECMWF | GFS
     :param datetimestr: format YYYYMMDDHH
     :return:
     """
@@ -123,9 +123,9 @@ def main(
 
     dict_fig: dict = dict()
 
-    if provider == "ecmwf":
+    if provider == "ECMWF":
         log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
-    elif provider == "gfs":
+    elif provider == "GFS":
         log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
     else:
         raise NotImplementedError("Wrong provider!")
@@ -232,8 +232,8 @@ if __name__ == "__main__":
         '--provider',
         type=str,
         required=True,
-        choices=["ecmwf", "gfs"],
-        help="Select provider 'ecmwf' | 'gfs', defualt=ecmwf"
+        choices=["ECMWF", "GFS"],
+        help="Select forecast provider (mandatory)"
     )
 
     main(
