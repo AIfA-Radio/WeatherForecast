@@ -118,8 +118,9 @@ def main(
     regex_datetime = re.compile(
         r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
     )
-    if not re.match(regex_datetime, datetimestr):
-        raise ValueError("Invalid Date/Time provided.")
+    if datetimestr:
+        if not re.match(regex_datetime, datetimestr):
+            raise ValueError("Invalid Date/Time provided.")
 
     dict_fig: dict = dict()
 
