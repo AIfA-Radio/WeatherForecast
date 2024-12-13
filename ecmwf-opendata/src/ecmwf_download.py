@@ -119,8 +119,8 @@ def main(
             resol="0p25",
             # preserve_request_order=True,  # ignored anyway
             target=target,
-            #date='20241118',
-            #time=00
+            # date='20241212',
+            # time=00
         )
         print(
             "Target file: {0}\n"

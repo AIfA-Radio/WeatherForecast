@@ -25,7 +25,7 @@ DATA_DIR = "{}/../../".format(
 PICKRADIUS = 5  # Points (Pt). How close the click needs to be to trigger an event.
 
 
-class Onpick(object):
+class _Onpick(object):
     """
     actions to be performed on canvas.mpl_connect events
     """
@@ -186,7 +186,7 @@ def main(
             legend_line.set_picker(PICKRADIUS)
             dict_fig[item]['map_legend_to_ax'][legend_line] = ax_line
 
-        dict_fig[item]['on_pick'] = Onpick(
+        dict_fig[item]['on_pick'] = _Onpick(
             fig=dict_fig[item]['fig'],
             map_legend_to_ax=dict_fig[item]['map_legend_to_ax']
         )

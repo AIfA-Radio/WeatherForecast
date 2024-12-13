@@ -7,9 +7,9 @@ forecast.json
 
 import os
 import sys
-import signal
 import re
 import json
+import signal
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,18 +25,18 @@ DATA_DIR = "{}/../../".format(
     ))
 COLOR_MAP = 'jet'
 V_MAX = 20.  # max abs. windspeed on windrose
-TITLE = "{} Windspeed [m/s] and (from) Direction [°] On Cerro Chajnantor"
+TITLE = "{} Windspeed [m/s] and (from) Direction [°] at {}"
 
 
-def read_log(log_file: str) -> dict:
+def read_json(json_file: str) -> dict:
     """
     read forecast JSON file
-    :param log_file: location of forecast.json
+    :param json_file: location of forecast.json
     :return:
     """
-    if not os.path.exists(log_file):
+    if not os.path.exists(json_file):
         raise FileNotFoundError
-    with open(log_file, "r") as jsonfile:
+    with open(json_file, "r") as jsonfile:
         res = json.load(jsonfile)
 
     return res
@@ -54,6 +54,8 @@ def main(
     :param video: if video is downloaded to mp4 
     :return:
     """
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     regex_datetime = re.compile(
         r"^(20[234][0-9])(0?[1-9]|1[012])(0[1-9]|[12]\d|3[01])(00|06|12|18)$"
     )
@@ -62,17 +64,20 @@ def main(
             raise ValueError("Invalid Date/Time provided.")
 
     if provider == "ECMWF":
-        log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
+        forecast_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
+        parameter_file = "{}/ecmwf-opendata/data/parameter.json".format(DATA_DIR)
         u_key = "10 metre U wind component"
         v_key = "10 metre V wind component"
     elif provider == "GFS":
-        log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
+        forecast_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
+        parameter_file = "{}/gfs/data/parameter.json".format(DATA_DIR)
         u_key = "U component of wind"
         v_key = "V component of wind"
     else:
         raise NotImplementedError("Wrong provider!")
 
-    dict_x = read_log(log_file=log_file)
+    dict_x = read_json(json_file=forecast_file)
+    location = read_json(json_file=parameter_file)["geo_coordinates"]["location"]
 
     try:
         last_issue_date = sorted(
@@ -99,12 +104,12 @@ def main(
     # initialize settings
     ax = plt.subplot(projection='polar')
     ax.set_rlim(0, math.ceil(V_MAX + 0.5))
-    fig.suptitle(TITLE.format(provider))
+    fig.suptitle(TITLE.format(provider, location))
 
     def animate(i):
         if not video and i == number_entries - 1:
             ax.clear()
-        fig.suptitle(TITLE.format(provider))
+        fig.suptitle(TITLE.format(provider, location))
         ax.set_title(datetime.strptime(time[i], '%Y%m%d%H%M'))
         ax.set_rlim(0, math.ceil(V_MAX + 0.5))
         ax.bar(
