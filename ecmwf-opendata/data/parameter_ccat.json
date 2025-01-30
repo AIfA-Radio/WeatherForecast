@@ -1,0 +1,8 @@
+{
+    "parameter" : ["tcwv", "sp", "2t", "2d", "10u", "10v"],
+    "geo_coordinates": {
+        "latitude": -22.985638889,
+        "longitude": -67.740277778,
+        "location": "CCAT Observatory, Cerro Chajnantor"
+    }
+}

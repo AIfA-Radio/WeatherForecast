@@ -90,8 +90,8 @@ physical model. Unforetunetely, the Artificial Intelligence/Integrated
 Forecasting System (AIFS) is in a beta version, that cannot be downloaded with 
 Opendata.
 
-## ECMWF
-discontinued - license is free of charge for research organisations, but 
+## ECMWF HRES Model "High Frequency products" 
+development discontinued - license is free of charge for research organisations, but 
 subject to service fee
 
 ## GFS
@@ -120,6 +120,15 @@ can be run with option "-t". In this case only the very first files
 are downloaded (and deleted) for testing the performance. Disable it in mycron
 when running productive!!! Option "-s \<hour>" runs the script to reduce the 
 temporal resolution (and bandwidth required) to every \<hour>th hour.
+
+## GFS-Downsized
+Current application is a derivative of the GFS application as of above. The 
+download sizes of the grib2 files were significantly reduced. 
+The package https://github.com/ecmwf/multiurl needs to be cloned and installed
+separately, if not already installed along with the 
+https://github.com/ecmwf/ecmwf-opendata package
+
+Status: development, as of 2025/01/30 
 
 ## Epilogue
 

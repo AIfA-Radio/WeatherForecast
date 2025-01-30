@@ -1,0 +1,17 @@
+{
+    "geo_coordinates": {
+        "latitude": 51.02253447379363,
+        "longitude": 7.035113220051732,
+        "location": "Leverkusen, Bullenwiese"
+    },
+    "parameter": [
+        {"shortName": ["dswrf"], "typeOfLevel": "surface", "stepType": "instant"}
+    ],
+    "grid": "SLS",
+    "validity": [],
+    "paramset": "",
+    "resol": "0p25",
+    "target": "data.grib2",
+    "date": "20250130",
+    "time": 6
+}

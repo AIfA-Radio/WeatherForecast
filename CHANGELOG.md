@@ -1,7 +1,17 @@
 # Changelog 
-## 0.0.5 (xxxx-xx-xx)
+## x.x.x (xxxx-xx-xx)
 ### Added
 - Quick viewer updated with save video option to mp4 file
+### Changed
+### Fixed
+### Deprecated
+### Removed
+### Security
+## 0.1.0 (2025-01-30)
+### Added
+- GFS downloads reduced by get requests with byte ranges implemented in 
+gfs-downsized. This reveals a very first draft, that requires some more work to 
+be done.
 ### Changed
 ### Fixed
 ### Deprecated
