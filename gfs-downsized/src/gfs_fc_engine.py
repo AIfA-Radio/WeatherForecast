@@ -5,27 +5,34 @@
 draft version, 2025-02-03
 """
 
-import os
 import json
 from gfs_fc_client import Client
 from argparse import ArgumentParser
 from multiprocessing import Process, Queue
 from gfs_fc_retrieve import extract, write_forecast
-from gfs_fc_aux import DATA_DIR, defined_kwargs
-
+# internal
+from gfs_fc_aux import defined_kwargs, config
 
 STEPS = list(range(1, 121)) + list(range(123, 385, 3))  # 0 step is "anl"
 
 
 def main(process: bool = False):
     dict_x: dict = {}
+
+    def collect(r: dict) -> dict:
+        for k, v in r.items():
+            try:
+                dict_x[k]['time'].extend(v['time'])
+                dict_x[k]['value'].extend(v['value'])
+            except KeyError:
+                dict_x[k] = v
+        return dict_x
+
+    # end module collect
+
     date_creation_string: str = None
     ps = list()  # list of processes
     qs = list()  # list of queues
-
-    config_file = "{}/parameter.json".format(DATA_DIR)
-    with open(config_file, "r") as f:
-        config = json.load(f)
 
     params = defined_kwargs(
         # validity optional, list of substrings, e.g. "fcst" and/or "anl"
@@ -44,16 +51,6 @@ def main(process: bool = False):
 
     # grid: mandatory [SLS|GLOB]
     client = Client(grid=config["grid"])
-
-    def collect(r: dict) -> dict:
-        for k, v in r.items():
-            try:
-                dict_x[k]['time'].extend(v['time'])
-                dict_x[k]['value'].extend(v['value'])
-            except KeyError:
-                dict_x[k] = v
-        return dict_x
-    # end module collect
 
     for step in steps if steps else STEPS:
         results = client.retrieve(

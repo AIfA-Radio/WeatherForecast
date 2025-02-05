@@ -10,6 +10,7 @@ from time import sleep
 from requests import Response
 from multiurl import download
 from datetime import datetime, timedelta, timezone
+# internal
 from gfs_fc_aux import DATA_DIR, LOG_DIR
 
 COMMON = "{_url}/{_model}.{_yyyymmdd}/{_H}/atmos/{_model}.t{_H}z."
@@ -42,7 +43,7 @@ class Client(object):
             *,
             model="gfs",  # gdas, enkfgdas
             grid="GLOB",
-            resol="0p25", # SLS has a resolution of 360 / 1536 !
+            resol="0p25",  # SLS has a resolution of 360 / 1536 !
             verify=True
     ):
         self.model = model
@@ -156,6 +157,7 @@ class Client(object):
             urls.append(url)
 
             return urls
+
         # end module
 
         try:
@@ -219,8 +221,8 @@ class Client(object):
                 dix[url][no]['offset'] = int(dix[url][no]['offset'])
                 # replace length by offset minus offset of last record
                 if no > 1:
-                    dix[url][no-1]['length'] = \
-                        dix[url][no]['offset'] - dix[url][no-1]['offset']
+                    dix[url][no - 1]['length'] = \
+                        dix[url][no]['offset'] - dix[url][no - 1]['offset']
                     dix[url][no]['length'] = length - dix[url][no]['offset']
                 # print(json.dumps( dix, indent=2))
 
@@ -234,9 +236,8 @@ class Client(object):
             sleep(1.)
         # end for loop url
 
-        out_file = open(f"{LOG_DIR}/indices.json", "w")
-        json.dump(dix, out_file, indent=2)
-        out_file.close()
+        with open("{}/indices.json".format(LOG_DIR), "w") as log_handle:
+            json.dump(dix, log_handle, indent=2)
 
         return dix
 
