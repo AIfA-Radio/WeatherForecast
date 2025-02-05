@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
 
-draft version, 2025-01-23
+draft version, 2025-02-03
 """
 import requests
 import json
 import os
 from time import sleep
+from requests import Response
 from multiurl import download
 from datetime import datetime, timedelta, timezone
 
@@ -28,6 +29,16 @@ DATA_DIR = "{}/../data".format(SOURCE_DIR)
 LOG_DIR = "{}/../logs".format(SOURCE_DIR)
 
 
+class Result:
+    def __init__(
+            self,
+            rc,
+            targets
+    ):
+        self.targets = targets
+        self.rc = rc
+
+
 class Client(object):
     def __init__(
             self,
@@ -47,6 +58,7 @@ class Client(object):
 
     def retrieve(
             self,
+            step,
             *,
             target=None,
             resol=None,
@@ -55,16 +67,19 @@ class Client(object):
         expected_size = list()
         results = list()
         files = list()
-        urls = self._get_urls(resol=resol,
-                              **kwargs)
+
+        urls = self._get_urls(
+            step=step,
+            resol=resol,
+            **kwargs)
         target = target if target else self.target
-        counter = 0
+
         for url in urls:
             print(url)
-            file = "{}{}.grib2".format(
+            file = "{}{:03d}.grib2".format(
                 target.split(".grib2")[0],
-                counter)
-            files.append(file)  # list of out files
+                step)
+            files.append("{}/{}".format(DATA_DIR, file))  # list of out files
             expected_size.append(sum([j[1] for j in url['parts']]))
             results.append(download(
                 **url,
@@ -73,9 +88,11 @@ class Client(object):
                 session=self.session
             ))
             os.chmod("{}/{}".format(DATA_DIR, file), 0o666)  # under Docker owner is root
-            counter += 1
 
-        return expected_size == results
+        return Result(
+            rc=expected_size == results,
+            targets=files
+        )
 
     def _dateandtime(
             self,
@@ -88,16 +105,17 @@ class Client(object):
         :param kwargs:
         :return: kwargs (date and time) modified
         """
+        fc_times = [0, 6, 12, 18]
         now = datetime.now(timezone.utc)
         time = int(now.strftime("%H"))
+
         if (kwargs.get('date')
-                and (False if kwargs.get("time") in [0, 6, 12, 18] else True)):
-            kwargs['time'] = 18  # last fc of the day
+                and (False if kwargs.get("time") in fc_times else True)):
+            kwargs['time'] = 18  # last fc time of the day
         kwargs['date'] = kwargs.get('date', now.strftime("%Y%m%d"))
         kwargs['time'] = kwargs.get('time', time - time % 6)
 
-        assert kwargs['time'] in [0, 6, 12, 18], \
-            "Value for time (UTC): [0|6|12|18]"
+        assert kwargs['time'] in fc_times, "Value for time (UTC): [0|6|12|18]"
 
         if self.lower_by_fc:
             dt = datetime.strptime(
@@ -111,7 +129,8 @@ class Client(object):
 
     def _get_urls(
             self,
-            resol,
+            step: int,
+            resol: str,
             **kwargs
     ) -> list:
         """
@@ -119,11 +138,7 @@ class Client(object):
         :param kwargs:
         :return:
         """
-        idx: list = None
         kwargs = self._dateandtime(**kwargs)
-        step = kwargs.get("step",
-                          list(range(0, 121))
-                          + list(range(123, 385, 3)))
 
         def _configure():
             args = dict()
@@ -132,18 +147,16 @@ class Client(object):
             args['_model'] = self.model
             args['_extension'] = "grib2"
             args['_params'] = "pgrb2"
-            args['_set'] = "" if not kwargs.get('paramset') \
-                else kwargs.get('paramset')
+            args['_set'] = kwargs.get('paramset', "")
             args['_resol'] = resol if resol else self.resol
             args['_yyyymmdd'] = kwargs['date']
             args['_H'] = "{:02d}".format(kwargs['time'])
 
+            # in case we create multiple urls
             urls = list()
-            for item in step:
-                args['_fc_hour'] = "{:03d}".format(item)
-                # kwargs['fc_hours'] = "{:03d}".format(item)
-                url = pattern.format(**args)
-                urls.append(url)
+            args['_fc_hour'] = "{:03d}".format(step)
+            url = pattern.format(**args)
+            urls.append(url)
 
             return urls
         # end module
@@ -152,14 +165,17 @@ class Client(object):
             idx = self._call_index(_configure())
         except Exception as e:  # ToDo specify exception
             print(e)
-            print("Resources not available. Trying a forecast 6 hrs earlier...")
-            kwargs = self._dateandtime(**kwargs)
-            try:
-                idx = self._call_index(_configure())
-            except Exception as e:  # ToDo specify exception
-                print(e)
-                print("Resources not available. Revise your parameter set ...")
-                exit(1)
+            print("Resources not available. Revise your parameter set ...")
+            return []
+            # try again for most recent available fc
+            # self.lower_by_fc = True
+            # kwargs = self._dateandtime(**kwargs)
+            # try:
+            #     idx = self._call_index(_configure())
+            # except Exception as e:
+            #     print(e)
+            #     print("Resources not available. Revise your parameter set ...")
+            #     exit(1)
 
         return self._prepare_request(idx, **kwargs)
 
@@ -180,7 +196,7 @@ class Client(object):
         for url in urls:
             try:
                 # size of grib data file
-                resp = requests.get(url, stream=True)
+                resp: Response = requests.get(url, stream=True)
                 resp.raise_for_status()
                 length = int(resp.headers.get("Content-length"))
 
@@ -191,8 +207,6 @@ class Client(object):
                 dix[url] = dict()
                 print(f"Index file {url_index} downloaded")
             except requests.exceptions.HTTPError as e:
-                # try again for most recent available fc
-                self.lower_by_fc = True
                 raise e  # return empty dict for current url
 
             for line in response.iter_lines():
@@ -208,19 +222,19 @@ class Client(object):
                 dix[url][no]['offset'] = int(dix[url][no]['offset'])
                 # replace length by offset minus offset of last record
                 if no > 1:
-                    dix[url][no - 1]['length'] = \
-                        dix[url][no]['offset'] - dix[url][no - 1]['offset']
+                    dix[url][no-1]['length'] = \
+                        dix[url][no]['offset'] - dix[url][no-1]['offset']
                     dix[url][no]['length'] = length - dix[url][no]['offset']
                 # print(json.dumps( dix, indent=2))
 
             # caveat: rate limit of <120/minute to the NOMADS site.
             # hits are considered to be head/listing commands as well as actual
-            # data download attempts, i.e. each get requests
+            # data download attempts, i.e. each get request
             # The block is temporary and typically lasts for 10 minutes
             # the system is automatically configured to blacklist an IP if it
             # continually hits the site over the threshold.
             # source: ncep.pmb.dataflow@noaa.gov (Brian)
-            sleep(.5)
+            sleep(1.)
         # end for loop url
 
         out_file = open(f"{LOG_DIR}/indices.json", "w")

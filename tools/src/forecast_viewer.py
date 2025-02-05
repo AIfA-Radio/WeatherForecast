@@ -18,11 +18,8 @@ from matplotlib.backend_bases import (KeyEvent, PickEvent, MouseButton,
 from matplotlib.figure import Figure
 
 # data directory relative to source
-DATA_DIR = "{}/../../".format(
-    os.path.dirname(
-        os.path.realpath(__file__)
-    ))
-PICKRADIUS = 5  # Points (Pt). How close the click needs to be to trigger an event.
+DATA_DIR = "{}/../../".format(os.path.dirname(os.path.realpath(__file__)))
+PICKRADIUS = 5  # Points. How close the click needs to be to trigger an event.
 
 
 class _Onpick(object):
@@ -124,12 +121,15 @@ def main(
 
     dict_fig: dict = dict()
 
-    if provider == "ECMWF":
-        log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
-    elif provider == "GFS":
-        log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
-    else:
-        raise NotImplementedError("Wrong provider!")
+    match provider:
+        case "ECMWF":
+            log_file = "{}/ecmwf-opendata/data/forecast.json".format(DATA_DIR)
+        case  "GFS":
+            log_file = "{}/gfs/data/forecast.json".format(DATA_DIR)
+        case "GFS-DOWNSIZED":
+            log_file = "{}/gfs-downsized/data/forecast.json".format(DATA_DIR)
+        case _:
+           raise NotImplementedError("Wrong provider!")
 
     dict_x = read_log(log_file=log_file)
 
@@ -166,8 +166,8 @@ def main(
                 dict_fig[item]['ax'].plot(
                     converted_dates,
                     values['value'],
-                    label=issue_date[:-2]
-                )[0])
+                    label=issue_date[:-2])[0]
+            )
 
     for item in dict_fig.keys():
         dict_fig[item]['ax'].set_title(item)
@@ -233,7 +233,7 @@ if __name__ == "__main__":
         '--provider',
         type=str,
         required=True,
-        choices=["ECMWF", "GFS"],
+        choices=["ECMWF", "GFS", "GFS-DOWNSIZED"],
         help="Select forecast provider (mandatory)"
     )
 

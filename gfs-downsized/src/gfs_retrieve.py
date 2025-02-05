@@ -4,21 +4,25 @@
 The NOAA Big Data Program also provides access to gridded 0.25°- and 0.5°-resolution
 analysis and forecast data in a trailing 30-day window in the AWS Open Data Registry for GFS.
 Download GFS forecast data
-https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/
-via FTP into a GRIB2 file and extract each parameter
+https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/ via HTTP
 """
 
 import pygrib
 import os
 import numpy as np
 import json
-
+from multiprocessing import Queue
 from scipy.interpolate import RegularGridInterpolator
 
 # data directory relative to source
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = "{}/../data".format(SOURCE_DIR)
 LOG_DIR = "{}/../logs".format(SOURCE_DIR)
+
+
+config_file = "{}/parameter.json".format(DATA_DIR)
+with open(config_file, "r") as f:
+    config = json.load(f)
 
 
 def defined_kwargs(**kwargs) -> dict:
@@ -57,29 +61,27 @@ def create_grid(
         lons: np.array
 ) -> dict:
     """
-    create grid on coordinates
+    create square in the coordinate grid that enclosed location
     :param coordinates:
     :param lats:
     :param lons:
     :return:
     """
     lat1, lat2, lon1, lon2 = -90., 90., 0., 360.
-    # scales from 90° to -90°
+    # lats scales from 90° to -90°
     for i in range(len(lats)):
         if coordinates[0] > lats[i]:
             lat1 = lats[i]
             break
         else:
             lat2 = lats[i]
-        lat1 = -90.
-    # scales from 0° to 360°
+    # longs scales from 0° to 360°  # for GFS, ECMWF ranges from -180° to 180°
     for i in range(len(lons)):
         if coordinates[1] < lons[i]:
             lon2 = lons[i]
             break
         else:
             lon1 = lons[i]
-        lon2 = 360.
 
     return {
         "lat1": lat1,
@@ -88,18 +90,19 @@ def create_grid(
         "lon2": lon2
     }
 
-def extract(target: str) -> dict:
+
+def extract(
+        target: str,
+        q: Queue = None
+) -> tuple[bool, dict] | None:
     """
 
-    :param target:
+    :param target: full path
+    :param q: queue for multiprocessing
     :return:
     """
-    fs: list = []
-    tmp: dict = {}
-
-    config_file = "{}/parameter.json".format(DATA_DIR)
-    with open(config_file, "r") as f:
-        config = json.load(f)
+    fs: list = list()
+    result: dict = dict()
 
     coords = np.array([config['geo_coordinates']['latitude'],
                        (config['geo_coordinates']['longitude'] + 360) % 360])
@@ -113,9 +116,9 @@ def extract(target: str) -> dict:
         item['dataDate'],
         item['dataTime']
     )
-    # figure out spatial resolution
+    # figure out spatial resolution from 1st item
     # print(item.values.shape)
-    resolution = 360 / item.values.shape[1]
+    resolution = 360 / item.values.shape[1]  # longitude
     print(f"Spatial resolution: {resolution} degree")
     lats, lons = item.latlons()
     # place a rectangle over the region to be used for forecast
@@ -136,6 +139,8 @@ def extract(target: str) -> dict:
         except ValueError:
             print("Filter parameter ", params, "not found. Skipping ...")
 
+    fsss.close()
+
     for item in fs:
         print(item["shortName"], item)
         data, lats, lons = item.data(**grid)
@@ -149,12 +154,16 @@ def extract(target: str) -> dict:
             item['validityDate'],
             item['validityTime']
         )
-        tmp[item['name']] = {
+        result[item['name']] = {
             "unit": item['units'],
             "time": [dt_str],
             "value": [value_at_coordinates]
         }
 
-    fsss.close()
+    os.remove(target)  # ToDo keep or remove
+    print("Target file '{}' deleted".format(target))
 
-    return date_creation_str, tmp
+    if q:
+        q.put((date_creation_str, result))
+    else:
+        return date_creation_str, result

@@ -1,7 +1,8 @@
 {
-    "parameter" : ["tcwv", "sp", "2t", "2d", "10u", "10v"],
+    "parameter" : ["ssrd"],
     "geo_coordinates": {
-        "latitude": -22.985638889,
-        "longitude": -67.740277778
+        "latitude": 51.02253447379363,
+        "longitude": 7.035113220051732,
+        "location": "Leverkusen, Bullenwiese"
     }
 }
