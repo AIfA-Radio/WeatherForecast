@@ -10,6 +10,7 @@ from time import sleep
 from requests import Response
 from multiurl import download
 from datetime import datetime, timedelta, timezone
+from gfs_fc_aux import DATA_DIR, LOG_DIR
 
 COMMON = "{_url}/{_model}.{_yyyymmdd}/{_H}/atmos/{_model}.t{_H}z."
 
@@ -23,10 +24,6 @@ PATTERNS = {
 URLS = {
     "gfs": "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod"
 }
-
-SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
-DATA_DIR = "{}/../data".format(SOURCE_DIR)
-LOG_DIR = "{}/../logs".format(SOURCE_DIR)
 
 
 class Result:

@@ -7,20 +7,14 @@ draft version, 2025-02-03
 
 import os
 import json
-from client import Client
-from gfs_retrieve import extract, write_forecast
+from gfs_fc_client import Client
 from argparse import ArgumentParser
 from multiprocessing import Process, Queue
+from gfs_fc_retrieve import extract, write_forecast
+from gfs_fc_aux import DATA_DIR, defined_kwargs
 
-
-SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
-DATA_DIR = "{}/../data".format(SOURCE_DIR)
 
 STEPS = list(range(1, 121)) + list(range(123, 385, 3))  # 0 step is "anl"
-
-
-def defined_kwargs(**kwargs) -> dict:
-    return {k: v for k, v in kwargs.items() if v is not None}
 
 
 def main(process: bool = False):
