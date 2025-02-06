@@ -1,7 +1,14 @@
 # Changelog 
 ## x.x.x (xxxx-xx-xx)
 ### Added
-- Quick viewer updated with save video option to mp4 file
+### Changed
+### Fixed
+### Deprecated
+### Removed
+### Security
+## 0.1.1 (2025-02-06)
+### Added
+- Docker for GFS-DOWNSIZED
 ### Changed
 ### Fixed
 ### Deprecated
