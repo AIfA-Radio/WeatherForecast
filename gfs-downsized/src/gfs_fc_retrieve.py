@@ -9,12 +9,12 @@ https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/ via HTTP
 
 import pygrib
 import os
-import numpy as np
 import json
+from numpy import array as np_array
 from multiprocessing import Queue
 from scipy.interpolate import RegularGridInterpolator
 # internal
-from gfs_fc_aux import DATA_DIR, config, defined_kwargs
+from gfs_fc_aux import data_file, config, defined_kwargs
 
 
 def write_forecast(
@@ -22,17 +22,16 @@ def write_forecast(
         forecast: dict
 ) -> None:
     """
-    update log.json
+    update forecast.json
     :param datetimestr: YYYYMMDDHH
     :param forecast:
     :return: None
     """
-    log_file = "{}/forecast.json".format(DATA_DIR)
-    if not os.path.exists(log_file):
-        with open(log_file, "w") as create_empty:
+    if not os.path.exists(data_file):
+        with open(data_file, "w") as create_empty:
             json.dump({}, create_empty)
-            os.chmod(log_file, 0o666)  # docker owner is root, anyone can delete
-    with open(log_file, "r+") as jsonFile:
+            os.chmod(data_file, 0o666)  # docker owner is root, anyone can delete
+    with open(data_file, "r+") as jsonFile:
         data = json.load(jsonFile)
         data[datetimestr] = forecast
         jsonFile.seek(0)  # rewind
@@ -44,12 +43,12 @@ def write_forecast(
 
 
 def create_grid(
-        coordinates: np.array,
-        lats: np.array,
-        lons: np.array
+        coordinates: np_array,
+        lats: np_array,
+        lons: np_array
 ) -> dict:
     """
-    create square in the coordinate grid that enclosed location
+    create square in the coordinate grid that encloses location
     :param coordinates:
     :param lats:
     :param lons:
@@ -84,15 +83,15 @@ def extract(
         q: Queue = None
 ) -> tuple[bool, dict] | None:
     """
-
+    extract grib2 file according to select parameter
     :param target: full path
-    :param q: queue for multiprocessing
+    :param q: queue per fc hour for multiprocessing
     :return:
     """
     fs: list = list()
     result: dict = dict()
 
-    coords = np.array([config['geo_coordinates']['latitude'],
+    coords = np_array([config['geo_coordinates']['latitude'],
                        (config['geo_coordinates']['longitude'] + 360) % 360])
 
     # open grib file

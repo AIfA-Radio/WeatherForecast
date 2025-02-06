@@ -11,6 +11,5 @@
     "validity": [],
     "paramset": "",
     "resol": "0p25",
-    "target": "data.grib2",
-    "time": 0
+    "target": "data.grib2"
 }

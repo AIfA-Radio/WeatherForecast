@@ -56,7 +56,8 @@ Results are available under data/forecast.json
 ```
 The forecasts can be viewed through a quick
 [forecast_viewer](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_viewer.py)
-for ECMWF and GFS. Select via option "-p". Also, the windspeed and direction is
+for ECMWF and GFS. Select the provider 
+via option "-p". Also, the windspeed and direction is
 displayed in a windrose, by calling [forecast_windrose](https://github.com/AIfA-Radio/WeatherForecast/blob/master/tools/src/forecast_windrose.py).
 Always the last forecast is considered, unless a different forecast is chosen 
 by option "-d". Option "-v" provides a save to mp4 file option. However, for 
@@ -64,7 +65,7 @@ utilizing the download mp4 function, the FFmpeg package is to be installed on
 the OS.
 
 ## ECMWF Opendata
-At no additional cost (research license) an atmospheric model high 
+At no additional cost (open license) an atmospheric model high 
 resolution 10-day forecast 
 is available on https://www.ecmwf.int/en/forecasts/datasets/set-i with
 4 forecast runs per day (00/06/12/18) (see dissemination schedule for details)
@@ -79,23 +80,23 @@ Forecasts for the following parameter will be downloaded:
 - wind speed in u direction 10 m above ground
 - wind speed in v direction 10 m above ground
 
-Note: Forecast runs issued at 0 and 12 UTC provide a forecast horizon of 240 hrs,
+Note: Forecast runs, issued at 0 and 12 UTC, provide a forecast horizon of 240 hrs,
 whilst it's 90 hrs for those issued at 6 and 18 UTC. This pecularity needs to be
 considered by the "--extended" option to be provided for 
-[ecmwf_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/src/ecmwf_download.py)
-(see [mycron](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/mycron))
+[ecmwf_download.py](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/src/ecmwf_download.py) (see [mycron](https://github.com/AIfA-Radio/WeatherForecast/blob/master/ecmwf-opendata/mycron))
 
 The current forecast is based on ECMWF’s Integrated Forecasting System, a 
 physical model. Unforetunetely, the Artificial Intelligence/Integrated 
-Forecasting System (AIFS) is in a beta version, that cannot be downloaded with 
-Opendata.
+Forecasting System (AIFS) is in a beta version, that can be downloaded with 
+Opendata. Howerver, the parameter set is reduced. 
 
 ## ECMWF HRES Model "High Frequency products" 
-development discontinued - license is free of charge for research organisations, but 
-subject to service fee
+Development discontinued - license is free of charge for research organisations, 
+but subject to a ne time service fee about 500€.
 
 ## GFS
-The GFS is run four times a day (00, 06, 12, 18 UTC), 
+GFS forecasts on a Global longitude-latitude grid (GLOB) 
+run four times a day (00, 06, 12, 18 UTC), 
 providing forecasts up to 16 days in advance
 and delivering a spatial resolution 0.25 degree grid (28 km edge length). 
 The model is divided into 127 vertical layers. It produces hourly forecast 
@@ -123,16 +124,23 @@ temporal resolution (and bandwidth required) to every \<hour>th hour.
 
 ## GFS-Downsized
 Current application is a derivative of the GFS application as of above. The 
-download sizes of the grib2 files were significantly reduced. 
+download sizes of the grib2 files are significantly reduced through byte range
+downloads of the actual parameters needed. This is achieved by prior extraction 
+of the from/to-byte positions of each parameter in the accompanying index files.
+
+Access of the data is carried out
+through HTTP GET requests on index and grib2 files. Please note a 
+rate limit of <120/minute to the NOMADS site. In addition, also data of
+the Semi-Lagrangian-Grid can be downloaded, revealing a spatial resolution
+of 0°.1171875. The parameter set differs from that of GLOB, though.
+
 The package https://github.com/ecmwf/multiurl needs to be cloned and installed
 separately, if not already installed along with the 
-https://github.com/ecmwf/ecmwf-opendata package
-
-Status: development, as of 2025/01/30 
+https://github.com/ecmwf/ecmwf-opendata package.
 
 ## Epilogue
 
 Problems? Issues? Drop us an email.
 
 contact: Ralf Antonius Timmermann (AIfA, University Bonn), 
-email: rtimmermann@astro.uni-bonn.de
+email: rtimmermann@astro.uni-bonn.de 

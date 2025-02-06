@@ -62,6 +62,14 @@ class Client(object):
             resol=None,
             **kwargs
     ):
+        """
+
+        :param step:
+        :param target:
+        :param resol:
+        :param kwargs:
+        :return:
+        """
         expected_size = list()
         results = list()
         files = list()
@@ -233,7 +241,7 @@ class Client(object):
             # the system is automatically configured to blacklist an IP if it
             # continually hits the site over the threshold.
             # source: ncep.pmb.dataflow@noaa.gov (Brian)
-            sleep(1.)
+            sleep(.5)
         # end for loop url
 
         with open("{}/indices.json".format(LOG_DIR), "w") as log_handle:

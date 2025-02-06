@@ -16,7 +16,14 @@ from gfs_fc_aux import defined_kwargs, config
 STEPS = list(range(1, 121)) + list(range(123, 385, 3))  # 0 step is "anl"
 
 
-def main(process: bool = False):
+def main(
+        process: bool = False
+) -> None:
+    """
+
+    :param process: engage multiprocessing if True
+    :return:
+    """
     dict_x: dict = {}
 
     def collect(r: dict) -> dict:
