@@ -1,0 +1,14 @@
+services:
+################################################################################
+# gfs-downsized download
+################################################################################
+  gfs-downsized:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    image: "gfs-downsized:0.1"
+    container_name: gfs-downsized
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped

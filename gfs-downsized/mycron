@@ -1,0 +1,1 @@
+30 0,6,12,18 * * *  python3 /app/src/gfs_fc_engine.py -p >>/var/log/out.log 2>/var/log/err.log
