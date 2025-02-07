@@ -6,11 +6,12 @@ draft version, 2025-02-03
 """
 
 import json
+import sys
 from gfs_fc_client import Client
 from argparse import ArgumentParser
 from multiprocessing import Process, Queue
-from gfs_fc_retrieve import extract, write_forecast
 # internal
+from gfs_fc_retrieve import extract, write_forecast
 from gfs_fc_aux import defined_kwargs, config
 
 STEPS = list(range(1, 121)) + list(range(123, 385, 3))  # 0 step is "anl"
@@ -68,7 +69,7 @@ def main(
         print(f"File size matched: {results.rc}")
 
         if not results.targets:
-            exit(1)
+            sys.exit(1)
 
         if process:
             queue = Queue()
@@ -83,17 +84,16 @@ def main(
         else:
             date_creation_string, res = extract(target=results.targets[0])
             dict_x = collect(res)
-            print(json.dumps(dict_x, indent=2))
 
     for q in qs:  # collecting from queue if filled
         date_creation_string, res = q.get()
         dict_x = collect(res)
-        print(json.dumps(dict_x, indent=2))
+    print(json.dumps(dict_x, indent=2))
 
     write_forecast(datetimestr=date_creation_string,
                    forecast=dict_x)  # always update
 
-    exit(0)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

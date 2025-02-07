@@ -17,6 +17,7 @@ RUN pip install /app/multiurl/
 
 # application and data directory
 COPY ./src/gfs_fc_*.py /app/src/
+COPY ./src/__init__.py /app/src/
 COPY ./data/parameter.json /app/data/parameter.json
 COPY ./logs/ /app/logs/
 

@@ -246,6 +246,7 @@ class Client(object):
 
         with open("{}/indices.json".format(LOG_DIR), "w") as log_handle:
             json.dump(dix, log_handle, indent=2)
+        os.chmod("{}/indices.json".format(LOG_DIR), 0o666)  # docker owner is root, anyone can delete
 
         return dix
 
