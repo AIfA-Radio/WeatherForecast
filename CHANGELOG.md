@@ -6,6 +6,19 @@
 ### Deprecated
 ### Removed
 ### Security
+## 0.2.0 (2025-02-12)
+### Added
+### Changed
+- Extraction of grib2 file run as threads reniced by 19.
+- Permit a retention period between http GET requests of the .idx and .grib2 
+files to avoid an "abuse blocking" of the requesting IP.
+- Selection of parameter done through index files, select * on grib2 file
+### Fixed
+- Check completeness of files on "https://nomads.ncep.noaa.gov/ domain before 
+downloading most recent forecast, otherwise choose a forecast @ -6 hrs. 
+### Deprecated
+### Removed
+### Security
 ## 0.1.1 (2025-02-06)
 ### Added
 - Docker for GFS-DOWNSIZED

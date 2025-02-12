@@ -126,13 +126,14 @@ temporal resolution (and bandwidth required) to every \<hour>th hour.
 Current application is a derivative of the GFS application as of above. The 
 download sizes of the grib2 files are significantly reduced through byte range
 downloads of the actual parameters needed. This is achieved by prior extraction 
-of the from/to-byte positions of each parameter in the accompanying index files.
+of the from/to byte positions of each parameter in the accompanying index files.
 
 Access of the data is carried out
 through HTTP GET requests on index and grib2 files. Please note a 
 rate limit of <120/minute to the NOMADS site. In addition, also data of
-the Semi-Lagrangian-Grid can be downloaded, revealing a spatial resolution
-of 0°.1171875. The parameter set differs from that of GLOB, though.
+the Semi-Lagrangian-Grid (SLS) can be downloaded, revealing a spatial resolution
+of 0°.1171875. The parameter set differs from that of the Lobal longitude-latitude 
+grid (GLOB), though.
 
 The package https://github.com/ecmwf/multiurl needs to be cloned and installed
 separately, if not already installed along with the 

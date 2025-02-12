@@ -7,9 +7,11 @@ LOG_DIR = "{}/../logs".format(SOURCE_DIR)
 
 config_file = "{}/parameter.json".format(DATA_DIR)
 with open(config_file, "r") as config_handle:
-    config = json.load(config_handle)
+    CONFIG = json.load(config_handle)
 
-data_file = "{}/forecast.json".format(DATA_DIR)
+DATA_FILE = "{}/forecast.json".format(DATA_DIR)
+
+STEPS = list(range(0, 121)) + list(range(123, 385, 3))  # 0 step is "anl"
 
 def defined_kwargs(**kwargs) -> dict:
     return {k: v for k, v in kwargs.items() if v is not None}
