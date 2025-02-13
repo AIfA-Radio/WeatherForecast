@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 """
-The NOAA Big Data Program also provides access to gridded 0.25°- and 0.5°-resolution
-analysis and forecast data in a trailing 30-day window in the AWS Open Data Registry for GFS.
 Download GFS forecast data
 https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/ via HTTP
 """

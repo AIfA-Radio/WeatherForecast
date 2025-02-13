@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 """
-
-draft version, 2025-02-03
+gfs_fc_client
+extracts grib2 file to files according to filter parameters set
 """
-import sys
 import requests
 import json
 import os
@@ -47,7 +46,7 @@ class Client(object):
             *,
             grid,
             parameter=None,
-            validity=None,
+#            validity=None,
             model="gfs",  # gdas, enkfgdas
             resol="0p25",  # SLS has a resolution of 360 / 1536 !
             paramset="",
@@ -60,7 +59,7 @@ class Client(object):
         self.resol = resol
         self.paramset = paramset
         self.verify = verify
-        self.validity = validity if validity else list()
+#        self.validity = validity if validity else list()
         self.session = requests.Session()
         self.target = "download.grib2"
         self.date = None
@@ -107,13 +106,14 @@ class Client(object):
             )
             # under Docker owner is root
             os.chmod("{}/{}".format(DATA_DIR, file), 0o666)
+            return Result(
+                rc=expected_size == results,
+                target="{}/{}".format(DATA_DIR, file))
         else:
-            sys.exit(1)
-
-        return Result(
-            rc=expected_size == results,
-            target="{}/{}".format(DATA_DIR, file)
-        )
+            print("No byte range provided with url. Skipping...")
+            return Result(
+                rc=False,
+                target=None)
 
     @staticmethod
     def _get_url_paths(
@@ -329,17 +329,19 @@ class Client(object):
             for k, value in v.items():
                 for p in self.parameter:  # parameter to be selected
                     predicate = False
-                    # checks
+
+                    # checks of parameters requested
                     assert p.get('shortName'), "shortName must not be empty!"
-                    if p.get('level'):
+                    if p.get('validity'):
                         assert p.get('typeOfLevel'), \
                             "typeOfLevel must not be empty!"
+
                     # evaluate fields shortName is compared in lower case
                     if value['shortName'].lower() in p['shortName']:
-                        if p.get('typeOfLevel'):
-                            if p.get('level'):
+                        if p.get('typeOfLevel'):  # if exists typOfLevel
+                            if p.get('validity'):  # if exists validity
                                 if p['typeOfLevel'] in value['level'] \
-                                        and p['level'] in value['level']:
+                                        and p['validity'] in value['validity']:
                                     predicate = True
                             else:
                                 if p['typeOfLevel'] in value['level']:
@@ -347,10 +349,11 @@ class Client(object):
                         else:
                             predicate = True
 
-                    if predicate and self.validity:
-                        if not any(i in value['validity']
-                                   for i in self.validity):
-                            predicate = False
+                    # ToDo keep it for a time being
+                    # if predicate and self.validity:
+                    #     if not any(i in value['validity']
+                    #                for i in self.validity):
+                    #         predicate = False
                     if predicate:
                         print("{}:{}:{}:{}".format(
                             value['datetime'],
@@ -369,7 +372,7 @@ class Client(object):
                     "url": url,
                     "parts": t}
             else:
-                raise KeyError("No filter applied.")
+                print("No filter applied.")
             # end for loop item number each url
             print("\n")
         # end for loop url

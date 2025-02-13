@@ -6,6 +6,14 @@
 ### Deprecated
 ### Removed
 ### Security
+## 0.2.1 (2025-02-13)
+### Added
+### Changed
+- Filter parameters boiled down to typeOfLeve and validity
+### Fixed
+### Deprecated
+### Removed
+### Security
 ## 0.2.0 (2025-02-12)
 ### Added
 ### Changed

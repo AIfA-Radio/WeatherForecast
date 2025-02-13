@@ -5,11 +5,10 @@
         "location": "Leverkusen, Bullenwiese"
     },
     "parameter": [
-        {"shortName": ["dswrf"], "typeOfLevel": "surface", "stepType": "instant"}
+        {"shortName": ["dswrf"], "typeOfLevel": "surface", "validity": "hour fcst"},
+        {"shortName": ["dswrf"], "typeOfLevel": "surface", "validity": "hour ave fcst"}
     ],
     "grid": "SLS",
-    "validity": [],
     "paramset": "",
-    "resol": "0p25",
-    "target": "data.grib2"
+    "resol": "0p25"
 }

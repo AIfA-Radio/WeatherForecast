@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-
-draft version, 2025-02-03
+gfs_fc_engine
+to read from client
 """
 
 import json
@@ -49,7 +49,7 @@ def main(
             # if parameter missing, entire parameter set
             parameter=CONFIG.get('parameter'),
             # validity optional, list of substrings, e.g. "fcst" and/or "anl"
-            validity=CONFIG.get('validity'),
+            # validity=CONFIG.get('validity'),
             # only used with grid="GLOB"
             paramset=CONFIG.get('paramset'),
             # only used with grid="GLOB"
@@ -70,7 +70,7 @@ def main(
         # success, match file size(s)
         print(f"File size matched: {results.rc}")
         if not results.target:
-            sys.exit(1)
+            continue
 
         if process:
             queue = Queue()
