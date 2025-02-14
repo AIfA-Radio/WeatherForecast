@@ -2,13 +2,15 @@
     "geo_coordinates": {
         "latitude": 51.02253447379363,
         "longitude": 7.035113220051732,
-        "location": "Leverkusen, Bullenwiese"
+        "location": "Leverkusen, Schlebusch - Bullenwiese"
     },
     "parameter": [
-        {"shortName": ["dswrf"], "typeOfLevel": "surface", "validity": "hour fcst"},
-        {"shortName": ["dswrf"], "typeOfLevel": "surface", "validity": "hour ave fcst"}
+        {"shortName": ["dswrf"], "typeOfLevel": "surface", "validity": "hour fcst"}
     ],
     "grid": "SLS",
     "paramset": "",
-    "resol": "0p25"
+    "resol": "0p25",
+    "date": "20250212",
+    "time": 18,
+    "debug": false
 }

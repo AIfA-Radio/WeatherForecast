@@ -13,7 +13,7 @@ from multiurl import download
 from datetime import datetime, timedelta, timezone
 from bs4 import BeautifulSoup
 # internal
-from gfs_fc_aux import DATA_DIR, LOG_DIR, STEPS
+from gfs_fc_aux import DATA_DIR, LOG_DIR, STEPS, CONFIG
 
 FC_TIMES = [0, 6, 12, 18]
 COMMON = "{_url}/{_model}.{_yyyymmdd}/{_H}/atmos/"
@@ -204,6 +204,7 @@ class Client(object):
         args['_url'] = URLS['gfs']
         args['_model'] = self.model
         args['_extension'] = "grib2"
+        # could be extended to e.g. goessimpgrb2 ???
         args['_params'] = "pgrb2"
         args['_set'] = self.paramset
         args['_resol'] = self.resol
@@ -279,23 +280,23 @@ class Client(object):
                 dix[url][no - 1]['length'] = \
                     dix[url][no]['offset'] - dix[url][no - 1]['offset']
                 dix[url][no]['length'] = length - dix[url][no]['offset']
-            # print(json.dumps( dix, indent=2))
 
-            # Caveat:
-            # NOMAD permits a rate limit of <120/minute to their site.
-            # hits are considered to be head/listing commands as well as actual
-            # data download attempts, i.e. each get http request
-            # The block is temporary and typically lasts for 10 minutes
-            # the system is automatically configured to blacklist an IP if it
-            # continually hits the site over the threshold.
-            # source: ncep.pmb.dataflow@noaa.gov (Brian)
-            # Hence, configure the sleep argument accordingly!
+        # Caveat:
+        # NOMAD permits a rate limit of <120/minute to their site.
+        # hits are considered to be head/listing commands as well as actual
+        # data download attempts, i.e. each get http request
+        # The block is temporary and typically lasts for 10 minutes
+        # the system is automatically configured to blacklist an IP if it
+        # continually hits the site over the threshold.
+        # source: ncep.pmb.dataflow@noaa.gov (Brian)
+        # Hence, configure the sleep argument accordingly!
         sleep(1.)
 
-        with open("{}/indices.json".format(LOG_DIR), "w") as log_handle:
-            json.dump(dix, log_handle, indent=2)
-        # docker owner is root, anyone can delete
-        os.chmod("{}/indices.json".format(LOG_DIR), 0o666)
+        if CONFIG['debug']:
+            with open("{}/indices.json".format(LOG_DIR), "w") as log_handle:
+                json.dump(dix, log_handle, indent=2)
+            # docker owner is root, anyone can delete
+            os.chmod("{}/indices.json".format(LOG_DIR), 0o666)
 
         return dix
 
@@ -349,7 +350,7 @@ class Client(object):
                         else:
                             predicate = True
 
-                    # ToDo keep it for a time being
+                    # ToDo keep for a time being
                     # if predicate and self.validity:
                     #     if not any(i in value['validity']
                     #                for i in self.validity):

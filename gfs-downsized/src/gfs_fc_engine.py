@@ -8,12 +8,17 @@ to read from client
 import json
 import sys
 import os
+import logging
 from gfs_fc_client import Client
 from argparse import ArgumentParser
 from multiprocessing import Process, Queue
 # internal
 from gfs_fc_download import extract, write_forecast
 from gfs_fc_aux import defined_kwargs, CONFIG, STEPS
+
+# Logging Format
+MYFORMAT: str = ("%(asctime)s :: %(levelname)s: %(filename)s - %(name)s - "
+                 "%(lineno)s - %(funcName)s()\t%(message)s")
 
 
 def main(
@@ -26,6 +31,14 @@ def main(
     :param keep_target: keep target, if True
     :return:
     """
+
+    # define logging
+    if CONFIG['debug']:
+        logging_level: str = "DEBUG"
+        logging.basicConfig(format=MYFORMAT,
+                            level=getattr(logging, logging_level),
+                            datefmt="%Y-%m-%d %H:%M:%S")
+
     dict_x = dict()
 
     def collect(r: dict) -> dict:
@@ -83,7 +96,7 @@ def main(
             os.system("renice -n 19 -p {}".format(p.pid))
             ps.append(p)
             qs.append(queue)
-            print("Number of processes: {} alive"
+            print("Number of alive processes: {}"
                   .format(sum([i.is_alive() for i in ps])))
         else:
             date_creation_string, res = extract(target=results.target)
@@ -93,7 +106,7 @@ def main(
         date_creation_string, res = q.get()
         dict_x = collect(res)
 
-    print(json.dumps(dict_x, indent=2))
+    # print(json.dumps(dict_x, indent=2))
 
     write_forecast(datetimestr=date_creation_string,
                    forecast=dict_x)  # always update entire json
@@ -102,6 +115,7 @@ def main(
 
 
 if __name__ == "__main__":
+    print(f"Python version utilized: {sys.version_info}")
     parser = ArgumentParser(
         description="Downloads weather forecasts from ECMWF")
     parser.add_argument(
@@ -117,5 +131,7 @@ if __name__ == "__main__":
         help="Deletion of target files disabled."
     )
 
-    main(process=parser.parse_args().process,
-         keep_target=parser.parse_args().keep_target)
+    main(
+        process=parser.parse_args().process,
+        keep_target=parser.parse_args().keep_target
+    )

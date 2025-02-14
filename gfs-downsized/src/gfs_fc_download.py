@@ -136,6 +136,7 @@ def extract(
     #         print("Filter parameter ", params, "not found. Skipping ...")
     fs.extend(fsss.select())
     fsss.close()
+    print("\n")
 
     for item in fs:
         print(item["shortName"], "->", item)
@@ -148,33 +149,31 @@ def extract(
         value_at_coordinates = list(nearest_neighbor(coords))[0]
 
         # key is somewhat crummy
-        combine_dict_key = ("{}:{}:{}:{}"
+        combined_dict_key = ("{}:{}:{}:{}"
                             .format(item['name'],
-                                    item['stepType'],
                                     item['typeOfLevel'],
+                                    item['stepType'],
                                     item['level']))
         dt_str = "{}{:04d}".format(
             item['validityDate'],
             item['validityTime']
         )
-        result[combine_dict_key] = {
+        result[combined_dict_key] = {
             "unit": item['units'],
             "time": [dt_str],
             "value": [value_at_coordinates]
         }
 
     # ToDo:
-    #  (Recitative) Thy hand, Belinda, darkness shades me,
-    #  On thy bosom let me rest,
-    #  More I would, but Death invades me;
-    #  Death is now a welcome guest.
-    #  (Aria) When I am laid, am laid in earth, May my wrongs create
-    #  No trouble, no trouble in thy breast;
-    #  Remember me, remember me, but ah! forget my fate.
-    #  Remember me, but ah! forget my fate.
+    #  Man that is born of a woman
+    #  hath but a short time to live,
+    #  and is full of misery.
+    #  He cometh up, and is cut down like a flower;
+    #  he fleeth as it were a shadow,
+    #  and ne'er continueth in one stay.
     if not keep_target:
         os.remove(target)
-        logging.debug("Target file '{}' laid in earth".format(target))
+        print("Target file '{}' deleted".format(target))
 
     if q:
         q.put((date_creation_str, result))
