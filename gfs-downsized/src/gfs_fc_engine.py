@@ -22,12 +22,12 @@ MYFORMAT: str = ("%(asctime)s :: %(levelname)s: %(filename)s - %(name)s - "
 
 
 def main(
-        process: bool = False,
+        parallel: bool = False,
         keep_target: bool = False
 ) -> None:
     """
 
-    :param process: engage multiprocessing, if True
+    :param parallel: engage multiprocessing, if True
     :param keep_target: keep target, if True
     :return:
     """
@@ -85,7 +85,7 @@ def main(
         if not results.target:
             continue
 
-        if process:
+        if parallel:
             queue = Queue()
             p = Process(target=extract,
                         args=(results.target, queue, keep_target),
@@ -120,9 +120,9 @@ if __name__ == "__main__":
         description="Downloads weather forecasts from ECMWF")
     parser.add_argument(
         '-p',
-        '--process',
+        '--parallel',
         action="store_true",
-        help="Apply Multiprocessing, if hardware permits the load."
+        help="Apply Multiprocessing, if hardware permits the augmented load."
     )
     parser.add_argument(
         '-k',
@@ -132,6 +132,6 @@ if __name__ == "__main__":
     )
 
     main(
-        process=parser.parse_args().process,
+        parallel=parser.parse_args().parallel,
         keep_target=parser.parse_args().keep_target
     )

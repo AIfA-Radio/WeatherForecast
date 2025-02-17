@@ -4,7 +4,7 @@
 Download GFS forecast data
 https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/ via HTTP
 """
-import logging
+
 import pygrib
 import os
 import json
