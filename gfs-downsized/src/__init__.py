@@ -1,5 +1,5 @@
 __author__ = "Dr. Ralf Antonius Timmermann"
-__copyright__ = ("Copyright (c) 2023-2024, Dr. Ralf Antonius Timmermann "
+__copyright__ = ("Copyright (c) 2023-2025, Dr. Ralf Antonius Timmermann "
                  "All rights reserved.")
 __credits__ = ""
 __license__ = "BSD-3-Clause"
